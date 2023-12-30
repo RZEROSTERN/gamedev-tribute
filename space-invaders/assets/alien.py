@@ -17,6 +17,7 @@ class MisteryShip(pygame.sprite.Sprite):
         self.screen_width = screen_width
         self.image = pygame.image.load("assets/graphics/mistery.png")
         self.offset = offset
+        self.mistery_ship_sound = pygame.mixer.Sound("assets/sounds/ufo_lowpitch.wav")
 
         x = random.choice([self.offset / 2, self.screen_width + self.offset - self.image.get_width()])
 
@@ -25,7 +26,7 @@ class MisteryShip(pygame.sprite.Sprite):
         else:
             self.speed = -3
 
-        self.rect = self.image.get_rect(topleft = (x, 40))
+        self.rect = self.image.get_rect(topleft = (x, 90))
 
     def update(self):
         self.rect.x += self.speed

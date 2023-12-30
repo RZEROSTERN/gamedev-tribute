@@ -10,6 +10,12 @@ OFFSET = 50
 GREY = (29, 29, 27)
 YELLOW = (243, 216, 63)
 
+font = pygame.font.Font("assets/fonts/monogram.ttf", 40)
+level_surface = font.render("LEVEL 01", False, YELLOW)
+game_over_surface = font.render("GAME OVER", False, YELLOW)
+score_text_surface = font.render("SCORE", False, YELLOW)
+high_score_text_surface = font.render("HIGH SCORE", False, YELLOW)
+
 screen = pygame.display.set_mode((SCREEN_WIDTH + OFFSET, SCREEN_HEIGHT + 2 * OFFSET))
 pygame.display.set_caption("Space Invaders")
 
@@ -53,6 +59,28 @@ while True:
     screen.fill(GREY)
     pygame.draw.rect(screen, YELLOW, (10,10, 780, 780), 2, 0, 60, 60, 60, 60)
     pygame.draw.line(screen, YELLOW, (25, 730), (775,730), 3)
+
+    if game.run:
+        screen.blit(level_surface, (570, 740, 50, 50))
+    else:
+        screen.blit(game_over_surface, (570, 740, 50, 50))
+
+    lives_offset = 50
+    for life in range(game.lives):
+        screen.blit(game.spaceship_group.sprite.image, (lives_offset, 745))
+        lives_offset += 50
+
+    screen.blit(score_text_surface, (50, 15, 50, 50))
+
+    formatted_score = str(game.score).zfill(5)
+    score_surface = font.render(formatted_score, False, YELLOW)
+
+    formatted_high_score = str(game.highscore).zfill(5)
+    high_score_surface = font.render(formatted_high_score, False, YELLOW)
+
+    screen.blit(score_surface, (50, 40, 50, 50))
+    screen.blit(high_score_text_surface, (550, 15, 50, 50))
+    screen.blit(high_score_surface, (625, 40, 50, 50))
 
     game.spaceship_group.draw(screen)
     game.spaceship_group.sprite.lasers_group.draw(screen)

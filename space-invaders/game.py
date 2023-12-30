@@ -21,6 +21,11 @@ class Game:
         self.mistery_ship_group = pygame.sprite.GroupSingle()
         self.lives = 3
         self.run = True
+        self.score = 0
+        self.highscore = 0
+        self.load_high_score()
+        self.explosion = pygame.mixer.Sound("assets/sounds/invaderkilled.wav")
+        self.mistery_explosion = pygame.mixer.Sound("assets/sounds/ufo_highpitch.wav")
 
     def create_shields(self):
         shield_width = len(grid[0]) * 3
@@ -75,15 +80,27 @@ class Game:
             self.alien_lasers_group.add(laser_sprite)
 
     def create_mistery_ship(self):
-        self.mistery_ship_group.add(MisteryShip(self.screen_width, self.offset))
+        mistery_ship = MisteryShip(self.screen_width, self.offset)
+        self.mistery_ship_group.add(mistery_ship)
+        mistery_ship.mistery_ship_sound.play()
 
     def check_for_collisions(self):
         # Spaceship
         if self.spaceship_group.sprite.lasers_group:
             for laser_sprite in self.spaceship_group.sprite.lasers_group:
-                if pygame.sprite.spritecollide(laser_sprite, self.aliens_group, True):
-                    laser_sprite.kill()
+                aliens_hit = pygame.sprite.spritecollide(laser_sprite, self.aliens_group, True)
+                
+                if aliens_hit:
+                    self.explosion.play()
+                    for alien in aliens_hit:
+                        self.score += alien.type * 100
+                        self.check_for_high_score()
+                        laser_sprite.kill()
+
                 if pygame.sprite.spritecollide(laser_sprite, self.mistery_ship_group, True):
+                    self.score += 500
+                    self.mistery_explosion.play()
+                    self.check_for_high_score()
                     laser_sprite.kill()
 
                 for shield in self.shields:
@@ -125,4 +142,18 @@ class Game:
         self.create_aliens()
         self.mistery_ship_group.empty()
         self.shields = self.create_shields()
+        self.score = 0
                 
+    def check_for_high_score(self):
+        if self.score > self.highscore:
+            self.highscore = self.score
+
+            with open("highscore.txt", "w") as file:
+                file.write(str(self.highscore))
+
+    def load_high_score(self):
+        try:
+            with open("highscore.txt", "r") as file:
+                self.highscore = int(file.read())
+        except FileNotFoundError:
+            self.highscore = 0
