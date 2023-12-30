@@ -10,10 +10,10 @@ Game::Game()
     gameOver = false;
     score = 0;
     InitAudioDevice();
-    music = LoadMusicStream("Sounds/bradinsky.mp3");
+    music = LoadMusicStream("sounds/bradinsky.mp3");
     PlayMusicStream(music);
-    rotateSound = LoadSound("Sounds/rotate.mp3");
-    clearSound = LoadSound("Sounds/clear.mp3");
+    rotateSound = LoadSound("sounds/rotate.mp3");
+    clearSound = LoadSound("sounds/clear.mp3");
 }
 
 Game::~Game()

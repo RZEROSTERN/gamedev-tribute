@@ -52,7 +52,7 @@ int main()
         DrawRectangleRounded({320, 64, 170, 60}, 0.3, 6, lightBlue);
 
         char scoreText[10];
-        sprintf_s(scoreText, "%d", game.score);
+        sprintf(scoreText, "%d", game.score);
         Vector2 textSize = MeasureTextEx(font, scoreText, 38, 2);
 
         DrawTextEx(font, scoreText, {320 + (170 - textSize.x) / 2, 75}, 36, 2, WHITE);
