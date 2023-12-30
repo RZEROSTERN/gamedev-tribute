@@ -18,7 +18,7 @@ class MisteryShip(pygame.sprite.Sprite):
         self.image = pygame.image.load("assets/graphics/mistery.png")
         self.offset = offset
 
-        x = random.choice([self.offset/2, self.screen_width + self.offset - self.image.get_width()])
+        x = random.choice([self.offset / 2, self.screen_width + self.offset - self.image.get_width()])
 
         if x == self.offset / 2:
             self.speed = 3
@@ -30,7 +30,7 @@ class MisteryShip(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed
 
-        if self.rect.right > self.screen_width:
+        if self.rect.right > self.screen_width + (self.offset / 2):
             self.kill()
-        elif self.rect.left < 0:
+        elif self.rect.left < self.offset / 2:
             self.kill()

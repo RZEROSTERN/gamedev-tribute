@@ -11,20 +11,20 @@ class Game:
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.spaceship_group = pygame.sprite.GroupSingle()
-        self.spaceship_group.add(Spaceship(self.screen_width, self.screen_height))
+        self.offset = offset
+        self.spaceship_group.add(Spaceship(self.screen_width, self.screen_height, self.offset))
         self.shields = self.create_shields()
         self.aliens_group = pygame.sprite.Group()
         self.create_aliens()
         self.aliens_direction = 1
         self.alien_lasers_group = pygame.sprite.Group()
         self.mistery_ship_group = pygame.sprite.GroupSingle()
-        self.offset = offset
         self.lives = 3
         self.run = True
 
     def create_shields(self):
         shield_width = len(grid[0]) * 3
-        gap =(self.screen_width - (4 * shield_width)) / 5
+        gap =((self.screen_width + self.offset) - (4 * shield_width)) / 5
         shields = []
 
         for i in range(4):
@@ -46,7 +46,7 @@ class Game:
                 else:
                     alien_type = 1
 
-                alien = Alien(alien_type, x, y)
+                alien = Alien(alien_type, x + (self.offset / 2), y)
                 self.aliens_group.add(alien)
 
     def move_aliens(self):
@@ -55,10 +55,10 @@ class Game:
         alien_sprites = self.aliens_group.sprites()
 
         for alien in alien_sprites:
-            if alien.rect.right >= self.screen_width:
+            if alien.rect.right >= self.screen_width + (self.offset / 2):
                 self.aliens_direction = -1
                 self.alien_move_down(2)
-            elif alien.rect.left <= 0:
+            elif alien.rect.left <= self.offset / 2:
                 self.aliens_direction = 1
                 self.alien_move_down(2)
 
@@ -119,4 +119,10 @@ class Game:
     def reset(self):
         self.run = True
         self.lives = 3
+        self.spaceship_group.sprite.reset()
+        self.aliens_group.empty()
+        self.alien_lasers_group.empty()
+        self.create_aliens()
+        self.mistery_ship_group.empty()
+        self.shields = self.create_shields()
                 
