@@ -115,4 +115,8 @@ class Game:
 
     def game_over(self):
         self.run = False
+
+    def reset(self):
+        self.run = True
+        self.lives = 3
                 
