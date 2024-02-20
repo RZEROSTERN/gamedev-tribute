@@ -11,17 +11,34 @@ class GameAssets:
         self.number_image_black_white = self.load_ind_img("numbers_black_white")
         self.number_image_black_orange = self.load_ind_img("numbers_black_orange")
 
-        # TODO: Images related to characters
+        # Images related to characters
         self.tank_images = self._load_all_tank_images()
+        self.bullet_images = self._get_specified_images(self.spritesheet, gc.BULLETS, gc.BLACK)
+        self.shield_images = self._get_specified_images(self.spritesheet, gc.SHIELD, gc.BLACK)
+        self.spawn_star_images = self._get_specified_images(self.spritesheet, gc.SPAWN_STAR, gc.BLACK)
 
-        # TODO: Game related images
+        # Game related images
+        self.power_up_images = self._get_specified_images(self.spritesheet, gc.POWER_UPS, gc.BLACK)
+        self.flag = self._get_specified_images(self.spritesheet, gc.FLAG, gc.BLACK)
+        self.explosions = self._get_specified_images(self.spritesheet, gc.EXPLOSIONS, gc.BLACK)
+        self.score = self._get_specified_images(self.spritesheet, gc.SCORE, gc.BLACK)
 
-        # TODO: Game HUD images
+        # Game HUD images
+        self.hud_images = self._get_specified_images(self.spritesheet, gc.HUD_INFO, gc.BLACK, transparent = False)
+        self.context = self._get_specified_images(self.spritesheet, gc.CONTEXT, gc.BLACK)
 
-        # TODO: Tile images
+        # Tile images
+        self.brick_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[432], gc.BLACK)
+        self.steel_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[482], gc.BLACK)
+        self.forest_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[483], gc.BLACK)
+        self.ice_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[484], gc.BLACK)
+        self.water_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[533], gc.BLACK)
 
         # TODO: Number images
+        self.number_black_white = self._get_specified_images(self.number_image_black_white, gc.NUMS, gc.BLACK)
+        self.number_black_orange = self._get_specified_images(self.number_image_black_orange, gc.NUMS, gc.BLACK)
 
+        # Score sheet images
         self.score_sheet_images = {}
 
         for image in ["hiScore", "arrow", "player1", "player2", "pts", "stage", "total"]:
@@ -45,7 +62,7 @@ class GameAssets:
                 surface.blit(self.spritesheet, (0,0), (col * gc.SPRITE_SIZE, row * gc.SPRITE_SIZE, gc.SPRITE_SIZE, gc.SPRITE_SIZE))
                 surface.set_colorkey(gc.BLACK)
 
-                surface = self.scale_image(surface, gc.IMAGE_SIZE)
+                surface = self.scale_image(surface, gc.SPRITE_SCALE)
                 tank_level = self._sort_tanks_into_levels(row)
                 tank_group = self._sort_tanks_into_groups(row, col)
                 tank_direction = self._sort_tanks_by_direction(col)
@@ -55,7 +72,8 @@ class GameAssets:
         return tank_image_dict
     
     def scale_image(self, image, scale):
-        image = pygame.transform.scale(image, (scale, scale))
+        width, height = image.get_size()
+        image = pygame.transform.scale(image, (scale * width, scale * height))
         return image
     
     def _sort_tanks_into_levels(self, row):
@@ -79,6 +97,26 @@ class GameAssets:
         elif col % 7 <= 5: return "Down"
         else: return "Right"
 
+    def _get_specified_images(self, spritesheet, img_coord_dict, color, transparent = True):
+        image_dictionary = {}
+        for key, pos in img_coord_dict.items():
+            image = self.get_image(spritesheet, pos[0], pos[1], pos[2], pos[3], color, transparent)
+            image_dictionary.setdefault(key, image)
+
+        return image_dictionary
+
+    def get_image(self, spritesheet, xPos, yPos, width, height, color, transparent = True):
+        surface = pygame.Surface((width, height))
+        surface.fill(color)
+        surface.blit(spritesheet, (0,0), (xPos, yPos, width, height))
+
+        if transparent:
+            surface.set_colorkey(color)
+            
+        surface = self.scale_image(surface, gc.SPRITE_SCALE)
+
+        return surface
+        
 
     def load_ind_img(self, path, scale = False, size = (0,0)):
         image = pygame.image.load(f"assets/{path}.png").convert_alpha()
@@ -87,3 +125,4 @@ class GameAssets:
             image = pygame.transform.scale(image, size)
         
         return image
+    

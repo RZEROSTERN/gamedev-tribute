@@ -3,7 +3,6 @@ import gameconfig as gc
 from gameassets import GameAssets
 
 class Main:
-    
     def __init__(self):
         # Main Game Obj
         pygame.init()
@@ -15,6 +14,9 @@ class Main:
         self.run = True
         
         self.assets = GameAssets()
+
+        self.game_on = True
+        self.game = None
 
     def run_game(self):
         # The Game Loop
@@ -36,7 +38,7 @@ class Main:
     def render(self):
         # Handle all of the assets
         self.screen.fill(gc.BLACK)
-        self.screen.blit(self.assets.tank_images["Tank_4"]["Green"]["Down"][0], (400,400))
+        self.screen.blit(self.assets.brick_tiles["small"], (350,350))
         pygame.display.update()
 
 if __name__ == "__main__":
