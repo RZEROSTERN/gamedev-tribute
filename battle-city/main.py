@@ -1,6 +1,7 @@
 import pygame
 import gameconfig as gc
 from gameassets import GameAssets
+from game import Game
 
 class Main:
     def __init__(self):
@@ -16,7 +17,7 @@ class Main:
         self.assets = GameAssets()
 
         self.game_on = True
-        self.game = None
+        self.game = Game(self, self.assets)
 
     def run_game(self):
         # The Game Loop
@@ -26,19 +27,29 @@ class Main:
             self.render()
 
     def input(self):
+        if self.game_on:
+            self.game.input()
+        
         # Input handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.run = False
+        if not self.game_on:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.run = False
 
     def update(self):
         # Update the game
         self.Clock.tick(gc.FPS)
 
+        if self.game_on:
+            self.game.update()
+
     def render(self):
         # Handle all of the assets
         self.screen.fill(gc.BLACK)
-        self.screen.blit(self.assets.brick_tiles["small"], (350,350))
+        
+        if self.game_on:
+            self.game.draw(self.screen)
+
         pygame.display.update()
 
 if __name__ == "__main__":
