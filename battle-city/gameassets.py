@@ -92,9 +92,9 @@ class GameAssets:
             return "Special"
         
     def _sort_tanks_by_direction(self, col):
-        if col % 7 <= 1: return "Up"
-        elif col % 7 <= 3: return "Left"
-        elif col % 7 <= 5: return "Down"
+        if col % 8 <= 1: return "Up"
+        elif col % 8 <= 3: return "Left"
+        elif col % 8 <= 5: return "Down"
         else: return "Right"
 
     def _get_specified_images(self, spritesheet, img_coord_dict, color, transparent = True):

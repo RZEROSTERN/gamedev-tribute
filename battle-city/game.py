@@ -1,6 +1,6 @@
 import pygame
 import gameconfig as gc
-from characters import Tank
+from characters import Tank, PlayerTank
 
 class Game:
     def __init__(self, main, assets):
@@ -11,10 +11,15 @@ class Game:
             "All_Tanks" : pygame.sprite.Group()
         }
 
-        self.player1 = Tank(self, self.assets, self.groups, (200, 200), "Up", "Gold", 0)
-        self.player2 = Tank(self, self.assets, self.groups, (400, 200), "Up", "Green", 1)
+        self.player1 = PlayerTank(self, self.assets, self.groups, (200, 200), "Up", "Gold", 0)
+        self.player2 = PlayerTank(self, self.assets, self.groups, (400, 200), "Up", "Green", 1)
 
     def input(self):
+        keypressed = pygame.key.get_pressed()
+
+        self.player1.input(keypressed)
+        self.player2.input(keypressed)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.main.run = False
