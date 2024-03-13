@@ -1,5 +1,6 @@
 import pygame
 import gameconfig as gc
+from characters import Tank
 
 class Game:
     def __init__(self, main, assets):
@@ -10,8 +11,8 @@ class Game:
             "All_Tanks" : pygame.sprite.Group()
         }
 
-        self.player1 = None
-        self.player2 = None
+        self.player1 = Tank(self, self.assets, self.groups, (200, 200), "Up", "Gold", 0)
+        self.player2 = Tank(self, self.assets, self.groups, (400, 200), "Up", "Green", 1)
 
     def input(self):
         for event in pygame.event.get():
@@ -23,7 +24,9 @@ class Game:
                     self.main.run = False
 
     def update(self):
-        print("Game running")
+        self.player1.update()
+        self.player2.update()
 
     def draw(self, window):
-        pass
+        self.player1.draw(window)
+        self.player2.draw(window)
