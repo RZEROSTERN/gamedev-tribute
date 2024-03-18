@@ -17,7 +17,7 @@ class Main:
         self.assets = GameAssets()
 
         self.game_on = True
-        self.game = Game(self, self.assets)
+        self.game = Game(self, self.assets, True, False)
 
     def run_game(self):
         # The Game Loop
