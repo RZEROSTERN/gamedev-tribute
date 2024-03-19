@@ -1,6 +1,6 @@
 import pygame
 import gameconfig as gc
-from characters import PlayerTank
+from characters import PlayerTank, Tank
 from gamehud import GameHud
 
 class Game:
@@ -9,7 +9,8 @@ class Game:
         self.assets = assets
 
         self.groups = {
-            "All_Tanks" : pygame.sprite.Group()
+            "All_Tanks" : pygame.sprite.Group(),
+            "Bullets" : pygame.sprite.Group()
         }
 
         self.player1_active = player1
@@ -44,20 +45,40 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.main.run = False
 
+                if event.key == pygame.K_SPACE:
+                    if self.player1_active:
+                        self.player1.shoot()
+
+                if event.key == pygame.K_RCTRL:
+                    if self.player2_active:
+                        self.player2.shoot()
+
+                if event.key == pygame.K_RETURN:
+                    Tank(self, self.assets, self.groups, (400, 400), "Down")
+                    self.enemies -= 1
+
     def update(self):
         self.hud.update()
 
-        if self.player1_active:
-            self.player1.update()
+        # if self.player1_active:
+        #    self.player1.update()
 
-        if self.player2_active:
-            self.player2.update()
+        # if self.player2_active:
+        #    self.player2.update()
+
+        for dictKey in self.groups.keys():
+            for item in self.groups[dictKey]:
+                item.update()
 
     def draw(self, window):
         self.hud.draw(window)
 
-        if self.player1_active:
-            self.player1.draw(window)
+        #if self.player1_active:
+        #    self.player1.draw(window)
 
-        if self.player2_active:
-            self.player2.draw(window)
+        # if self.player2_active:
+        #    self.player2.draw(window)
+
+        for dictKey in self.groups.keys():
+            for item in self.groups[dictKey]:
+                item.draw(window)

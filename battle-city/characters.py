@@ -1,8 +1,9 @@
 import pygame
+from ammo import Bullet
 import gameconfig as gc
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, game, assets, groups, position, direction, colour = "Silver", tank_level = 0):
+    def __init__(self, game, assets, groups, position, direction, enemy = True, colour = "Silver", tank_level = 0):
         super().__init__()
 
         self.game = game
@@ -26,15 +27,28 @@ class Tank(pygame.sprite.Sprite):
         self.tank_level = tank_level
         self.colour = colour
         self.tank_speed = gc.TANK_SPEED
+        self.enemy = enemy
+        self.tank_health = 1
 
         self.frame_index = 0
         self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
         self.rect = self.image.get_rect(topleft = (self.spawn_pos))
         self.width, self.height = self.image.get_size()
 
+        self.bullet_limit = 1
+        self.bullet_sum = 0
+
+        self.paralyzed = False
+        self.paralysis = gc.TANK_PARALYSIS
+        self.paralysis_timer = pygame.time.get_ticks()
+
         self.spawn_image = self.spawn_images[f"star_{self.frame_index}"]
         self.spawn_timer = pygame.time.get_ticks()
         self.spawn_anim_timer = pygame.time.get_ticks()
+
+        self.mask_dict = self.get_various_masks()
+        self.mask = self.mask_dict[self.direction]
+        self.mask_direction = self.direction
 
     def input(self):
         pass
@@ -47,8 +61,11 @@ class Tank(pygame.sprite.Sprite):
                 self.frame_index = 0
                 self.spawning = False
                 self.active = True
+            return
 
-        return
+        if self.paralyzed:
+            if pygame.time.get_ticks() - self.paralysis_timer >= self.paralysis:
+                self.paralyzed = False
 
     def draw(self, window):
         if self.spawning:
@@ -63,6 +80,10 @@ class Tank(pygame.sprite.Sprite):
             return
         
         self.direction = direction
+
+        if self.paralyzed:
+            self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
+            return
 
         if direction == "Up":
             self.yPos -= self.tank_speed
@@ -97,11 +118,24 @@ class Tank(pygame.sprite.Sprite):
         self.frame_index = self.frame_index % imagelistlength
         self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
 
+        if self.mask_direction != self.direction:
+            self.mask_direction = self.direction
+            self.mask = self.mask_dict[self.mask_direction]
+
     def spawn_animation(self):
         self.frame_index += 1
         self.frame_index = self.frame_index % len(self.spawn_images)
         self.spawn_image = self.spawn_images[f"star_{self.frame_index}"]
         self.spawn_anim_timer = pygame.time.get_ticks()
+
+    def get_various_masks(self):
+        images = {}
+
+        for direction in ["Up", "Down", "Left", "Right"]:
+            image_to_mask = self.tank_images[f"Tank_{self.tank_level}"][self.colour][direction][0]
+            images.setdefault(direction, pygame.mask.from_surface(image_to_mask))
+
+        return images
 
     def tank_on_tank_collisions(self):
         tank_collision = pygame.sprite.spritecollide(self, self.tank_group, False)
@@ -134,11 +168,28 @@ class Tank(pygame.sprite.Sprite):
                     self.rect.bottom = tank.rect.top
                     self.yPos = self.rect.y
 
+    def shoot(self):
+        if self.bullet_sum >= self.bullet_limit:
+            return
+        
+        bullet = Bullet(self.groups, self, self.rect.center, self.direction, self.assets)
+        self.bullet_sum += 1
 
+    def paralyze_tank(self, paralysis_time):
+        self.paralysis = paralysis_time
+        self.paralyzed = True
+        self.paralysis_timer = pygame.time.get_ticks()
+
+    def destroy_tank(self):
+        self.tank_health -= 1
+
+        if self.tank_health <= 0:
+            self.kill()
+            return
 
 class PlayerTank(Tank):
     def __init__(self, game, assets, groups, position, direction, colour, tank_level):
-        super().__init__(game, assets, groups, position, direction, colour, tank_level)
+        super().__init__(game, assets, groups, position, direction, False, colour, tank_level)
         self.lives = 3
 
     def input(self, keypressed):
