@@ -30,6 +30,9 @@ class Bullet(pygame.sprite.Sprite):
         self.collide_with_tank()
         self.collision_with_bullet()
 
+        self.mask = pygame.mask.from_surface(self.image)
+        self.mask_image = self.mask.to_surface()
+
     def draw(self, window):
         window.blit(self.image, self.rect)
         pygame.draw.rect(window, gc.GREEN, self.rect, 1)

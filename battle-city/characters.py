@@ -48,12 +48,18 @@ class Tank(pygame.sprite.Sprite):
 
         self.mask_dict = self.get_various_masks()
         self.mask = self.mask_dict[self.direction]
+        self.mask_image = self.mask.to_surface()
         self.mask_direction = self.direction
 
     def input(self):
         pass
 
     def update(self):
+        self.mask_dict = self.get_various_masks()
+        self.mask = self.mask_dict[self.direction]
+        self.mask_image = self.mask.to_surface()
+        self.mask_direction = self.direction
+
         if self.spawning:
             if pygame.time.get_ticks() - self.spawn_anim_timer >= 50:
                 self.spawn_animation()
@@ -73,6 +79,7 @@ class Tank(pygame.sprite.Sprite):
 
         if self.active:
             window.blit(self.image, self.rect)
+            window.blit(self.mask_image, self.rect)
             pygame.draw.rect(window, gc.RED, self.rect, 1)
 
     def move_tank(self, direction):
