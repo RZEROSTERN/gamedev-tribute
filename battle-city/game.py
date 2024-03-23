@@ -3,14 +3,15 @@ import gameconfig as gc
 from characters import PlayerTank, Tank
 from gamehud import GameHud
 
+
 class Game:
-    def __init__(self, main, assets, player1 = True, player2 = False):
+    def __init__(self, main, assets, player1=True, player2=False):
         self.main = main
         self.assets = assets
 
         self.groups = {
-            "All_Tanks" : pygame.sprite.Group(),
-            "Bullets" : pygame.sprite.Group()
+            "All_Tanks": pygame.sprite.Group(),
+            "Bullets": pygame.sprite.Group()
         }
 
         self.player1_active = player1
@@ -73,7 +74,7 @@ class Game:
     def draw(self, window):
         self.hud.draw(window)
 
-        #if self.player1_active:
+        # if self.player1_active:
         #    self.player1.draw(window)
 
         # if self.player2_active:

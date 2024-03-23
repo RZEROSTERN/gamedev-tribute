@@ -1,6 +1,7 @@
 import pygame
 import gameconfig as gc
 
+
 class LevelEditor:
     def __init__(self, main, assets):
         self.main = main

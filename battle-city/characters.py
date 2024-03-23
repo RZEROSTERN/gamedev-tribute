@@ -2,8 +2,9 @@ import pygame
 from ammo import Bullet
 import gameconfig as gc
 
+
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, game, assets, groups, position, direction, enemy = True, colour = "Silver", tank_level = 0):
+    def __init__(self, game, assets, groups, position, direction, enemy=True, colour="Silver", tank_level=0):
         super().__init__()
 
         self.game = game
@@ -11,7 +12,7 @@ class Tank(pygame.sprite.Sprite):
         self.groups = groups
 
         self.tank_group = self.groups["All_Tanks"]
-        
+
         self.tank_group.add(self)
 
         self.tank_images = self.assets.tank_images
@@ -32,7 +33,7 @@ class Tank(pygame.sprite.Sprite):
 
         self.frame_index = 0
         self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
-        self.rect = self.image.get_rect(topleft = (self.spawn_pos))
+        self.rect = self.image.get_rect(topleft=(self.spawn_pos))
         self.width, self.height = self.image.get_size()
 
         self.bullet_limit = 1
@@ -85,7 +86,7 @@ class Tank(pygame.sprite.Sprite):
     def move_tank(self, direction):
         if self.spawning:
             return
-        
+
         self.direction = direction
 
         if self.paralyzed:
@@ -94,7 +95,7 @@ class Tank(pygame.sprite.Sprite):
 
         if direction == "Up":
             self.yPos -= self.tank_speed
-            
+
             if self.yPos < gc.SCREEN_BORDER_TOP:
                 self.yPos = gc.SCREEN_BORDER_TOP
 
@@ -118,7 +119,7 @@ class Tank(pygame.sprite.Sprite):
         self.rect.topleft = (self.xPos, self.yPos)
         self.tank_movement_animation()
         self.tank_on_tank_collisions()
-        
+
     def tank_movement_animation(self):
         self.frame_index += 1
         imagelistlength = len(self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction])
@@ -149,36 +150,36 @@ class Tank(pygame.sprite.Sprite):
 
         if len(tank_collision) == 1:
             return
-        
+
         for tank in tank_collision:
             if tank == self:
                 continue
 
             if self.direction == "Right":
                 if self.rect.right >= tank.rect.left and \
-                    self.rect.bottom > tank.rect.top and self.rect.top < tank.rect.bottom:
+                        self.rect.bottom > tank.rect.top and self.rect.top < tank.rect.bottom:
                     self.rect.right = tank.rect.left
                     self.xPos = self.rect.x
             elif self.direction == "Left":
                 if self.rect.left <= tank.rect.right and \
-                    self.rect.bottom > tank.rect.top and self.rect.top < tank.rect.bottom:
+                        self.rect.bottom > tank.rect.top and self.rect.top < tank.rect.bottom:
                     self.rect.left = tank.rect.right
                     self.xPos = self.rect.x
             elif self.direction == "Up":
                 if self.rect.top <= tank.rect.bottom and \
-                    self.rect.left < tank.rect.right and self.rect.right > tank.rect.left:
+                        self.rect.left < tank.rect.right and self.rect.right > tank.rect.left:
                     self.rect.top = tank.rect.bottom
                     self.yPos = self.rect.y
             elif self.direction == "Down":
                 if self.rect.bottom >= tank.rect.top and \
-                    self.rect.left < tank.rect.right and self.rect.right > tank.rect.left:
+                        self.rect.left < tank.rect.right and self.rect.right > tank.rect.left:
                     self.rect.bottom = tank.rect.top
                     self.yPos = self.rect.y
 
     def shoot(self):
         if self.bullet_sum >= self.bullet_limit:
             return
-        
+
         bullet = Bullet(self.groups, self, self.rect.center, self.direction, self.assets)
         self.bullet_sum += 1
 
@@ -193,6 +194,7 @@ class Tank(pygame.sprite.Sprite):
         if self.tank_health <= 0:
             self.kill()
             return
+
 
 class PlayerTank(Tank):
     def __init__(self, game, assets, groups, position, direction, colour, tank_level):
@@ -209,7 +211,7 @@ class PlayerTank(Tank):
                 self.move_tank("Left")
             elif keypressed[pygame.K_d]:
                 self.move_tank("Right")
-        
+
         if self.colour == "Green":
             if keypressed[pygame.K_UP]:
                 self.move_tank("Up")

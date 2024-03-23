@@ -1,6 +1,7 @@
 import pygame
 import gameconfig as gc
 
+
 class GameHud:
     def __init__(self, game, assets):
         self.game = game
@@ -17,18 +18,17 @@ class GameHud:
 
         self.level = 1
         self.levelimage = self.display_stage_number(self.level)
-        self.levelimagerect = self.levelimage.get_rect(topleft = (14.5 * gc.IMAGE_SIZE, 13 * gc.IMAGE_SIZE))
-
+        self.levelimagerect = self.levelimage.get_rect(topleft=(14.5 * gc.IMAGE_SIZE, 13 * gc.IMAGE_SIZE))
 
     def generate_hud_overlay_screen(self):
         overlay_screen = pygame.Surface((gc.SCREEN_WIDTH, gc.SCREEN_HEIGHT))
         overlay_screen.fill(gc.GREY)
-        pygame.draw.rect(overlay_screen,gc.BLACK, (gc.GAME_SCREEN))
+        pygame.draw.rect(overlay_screen, gc.BLACK, (gc.GAME_SCREEN))
         overlay_screen.blit(self.images["info_panel"], (gc.INFO_PANEL_X, gc.INFO_PANEL_Y))
         overlay_screen.set_colorkey(gc.BLACK)
 
         return overlay_screen
-    
+
     def draw_enemy_tanks_remaining(self, window):
         row = 0
         offset_x, offset_x_2 = 14.5 * gc.IMAGE_SIZE, 15 * gc.IMAGE_SIZE
@@ -43,9 +43,9 @@ class GameHud:
                 window.blit(self.images["life"], (x, y))
             else:
                 window.blit(self.images["grey_square"], (x, y))
-            
+
         return
-    
+
     def display_player_lives(self, playerlives, player_active):
         width, height = gc.IMAGE_SIZE, gc.IMAGE_SIZE // 2
         surface = pygame.Surface((width, height))
@@ -58,20 +58,20 @@ class GameHud:
             surface.blit(self.images["grey_square"], (gc.IMAGE_SIZE // 2, 0))
 
             return surface
-        
+
         if playerlives < 10:
             image = pygame.transform.rotate(self.images["life"], 180)
         else:
             num = str(playerlives)[0]
             image = self.images[f"num_{num}"]
-        
+
         surface.blit(image, (0, 0))
         num = str(playerlives)[-1]
         image_2 = self.images[f"num_{num}"]
         surface.blit(image_2, (gc.IMAGE_SIZE // 2, 0))
-        
+
         return surface
-    
+
     def display_stage_number(self, level):
         width, height = gc.IMAGE_SIZE, gc.IMAGE_SIZE // 2
         surface = pygame.Surface((width, height))
@@ -90,7 +90,7 @@ class GameHud:
         surface.blit(image_2, (gc.IMAGE_SIZE // 2, 0))
 
         return surface
-    
+
     def update(self):
         self.enemies = self.game.enemies
 
@@ -113,7 +113,7 @@ class GameHud:
             self.levelimage = self.display_stage_number(self.level)
 
     def draw(self, window):
-        window.blit(self.hud_overlay, (0,0))
+        window.blit(self.hud_overlay, (0, 0))
 
         self.draw_enemy_tanks_remaining(window)
 

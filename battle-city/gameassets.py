@@ -1,6 +1,7 @@
 import pygame
 import gameconfig as gc
 
+
 class GameAssets:
     def __init__(self):
         # Start Screen Assets
@@ -24,7 +25,7 @@ class GameAssets:
         self.score = self._get_specified_images(self.spritesheet, gc.SCORE, gc.BLACK)
 
         # Game HUD images
-        self.hud_images = self._get_specified_images(self.spritesheet, gc.HUD_INFO, gc.BLACK, transparent = False)
+        self.hud_images = self._get_specified_images(self.spritesheet, gc.HUD_INFO, gc.BLACK, transparent=False)
         self.context = self._get_specified_images(self.spritesheet, gc.CONTEXT, gc.BLACK)
 
         # Tile images
@@ -59,7 +60,8 @@ class GameAssets:
             for col in range(16):
                 surface = pygame.Surface((gc.SPRITE_SIZE, gc.SPRITE_SIZE))
                 surface.fill(gc.BLACK)
-                surface.blit(self.spritesheet, (0,0), (col * gc.SPRITE_SIZE, row * gc.SPRITE_SIZE, gc.SPRITE_SIZE, gc.SPRITE_SIZE))
+                surface.blit(self.spritesheet, (0, 0),
+                             (col * gc.SPRITE_SIZE, row * gc.SPRITE_SIZE, gc.SPRITE_SIZE, gc.SPRITE_SIZE))
                 surface.set_colorkey(gc.BLACK)
 
                 surface = self.scale_image(surface, gc.SPRITE_SCALE)
@@ -70,17 +72,17 @@ class GameAssets:
                 tank_image_dict[tank_level][tank_group][tank_direction].append(surface)
 
         return tank_image_dict
-    
+
     def scale_image(self, image, scale):
         width, height = image.get_size()
         image = pygame.transform.scale(image, (scale * width, scale * height))
         return image
-    
+
     def _sort_tanks_into_levels(self, row):
         tank_levels = {0: "Tank_0", 1: "Tank_1", 2: "Tank_2", 3: "Tank_3",
                        4: "Tank_4", 5: "Tank_5", 6: "Tank_6", 7: "Tank_7"}
         return tank_levels[row % 8]
-    
+
     def _sort_tanks_into_groups(self, row, col):
         if 0 <= row <= 7 and 0 <= col <= 7:
             return "Gold"
@@ -90,14 +92,18 @@ class GameAssets:
             return "Silver"
         else:
             return "Special"
-        
-    def _sort_tanks_by_direction(self, col):
-        if col % 8 <= 1: return "Up"
-        elif col % 8 <= 3: return "Left"
-        elif col % 8 <= 5: return "Down"
-        else: return "Right"
 
-    def _get_specified_images(self, spritesheet, img_coord_dict, color, transparent = True):
+    def _sort_tanks_by_direction(self, col):
+        if col % 8 <= 1:
+            return "Up"
+        elif col % 8 <= 3:
+            return "Left"
+        elif col % 8 <= 5:
+            return "Down"
+        else:
+            return "Right"
+
+    def _get_specified_images(self, spritesheet, img_coord_dict, color, transparent=True):
         image_dictionary = {}
         for key, pos in img_coord_dict.items():
             image = self.get_image(spritesheet, pos[0], pos[1], pos[2], pos[3], color, transparent)
@@ -105,24 +111,22 @@ class GameAssets:
 
         return image_dictionary
 
-    def get_image(self, spritesheet, xPos, yPos, width, height, color, transparent = True):
+    def get_image(self, spritesheet, xPos, yPos, width, height, color, transparent=True):
         surface = pygame.Surface((width, height))
         surface.fill(color)
-        surface.blit(spritesheet, (0,0), (xPos, yPos, width, height))
+        surface.blit(spritesheet, (0, 0), (xPos, yPos, width, height))
 
         if transparent:
             surface.set_colorkey(color)
-            
+
         surface = self.scale_image(surface, gc.SPRITE_SCALE)
 
         return surface
-        
 
-    def load_ind_img(self, path, scale = False, size = (0,0)):
+    def load_ind_img(self, path, scale=False, size=(0, 0)):
         image = pygame.image.load(f"assets/{path}.png").convert_alpha()
 
         if scale:
             image = pygame.transform.scale(image, size)
-        
+
         return image
-    

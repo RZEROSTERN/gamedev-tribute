@@ -4,6 +4,7 @@ from gameassets import GameAssets
 from game import Game
 from leveleditor import LevelEditor
 
+
 class Main:
     def __init__(self):
         # Main Game Obj
@@ -14,7 +15,7 @@ class Main:
 
         self.Clock = pygame.time.Clock()
         self.run = True
-        
+
         self.assets = GameAssets()
 
         self.game_on = False
@@ -36,7 +37,7 @@ class Main:
 
         if self.level_editor_on:
             self.level_creator.input()
-        
+
         # Input handling
         if not self.game_on and not self.level_editor_on:
             for event in pygame.event.get():
@@ -56,7 +57,7 @@ class Main:
     def render(self):
         # Handle all of the assets
         self.screen.fill(gc.BLACK)
-        
+
         if self.game_on:
             self.game.draw(self.screen)
 
@@ -65,8 +66,8 @@ class Main:
 
         pygame.display.update()
 
+
 if __name__ == "__main__":
     battleCity = Main()
     battleCity.run_game()
     pygame.quit()
-        

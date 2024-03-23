@@ -1,6 +1,7 @@
 import pygame
 import gameconfig as gc
 
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups, owner, pos, dir, assets):
         super().__init__()
@@ -53,13 +54,13 @@ class Bullet(pygame.sprite.Sprite):
 
     def collide_edge_of_screen(self):
         if self.rect.top <= gc.SCREEN_BORDER_TOP or \
-            self.rect.bottom >= gc.SCREEN_BORDER_BOTTOM or \
-            self.rect.left <= gc.SCREEN_BORDER_LEFT or \
-            self.rect.right >= gc.SCREEN_BORDER_RIGHT:
+                self.rect.bottom >= gc.SCREEN_BORDER_BOTTOM or \
+                self.rect.left <= gc.SCREEN_BORDER_LEFT or \
+                self.rect.right >= gc.SCREEN_BORDER_RIGHT:
             self.update_owner()
             self.kill()
 
-    def collide_with_tank(self):    
+    def collide_with_tank(self):
         tank_collisions = pygame.sprite.spritecollide(self, self.tanks, False)
 
         for tank in tank_collisions:
@@ -75,7 +76,7 @@ class Bullet(pygame.sprite.Sprite):
                     break
 
             if (self.owner.enemy == False and tank.enemy == True) or \
-                (self.owner.enemy == True and tank.enemy == False):
+                    (self.owner.enemy == True and tank.enemy == False):
                 if pygame.sprite.collide_mask(self, tank):
                     self.update_owner()
                     tank.destroy_tank()
@@ -87,7 +88,7 @@ class Bullet(pygame.sprite.Sprite):
 
         if len(bullet_hit) == 1:
             return
-        
+
         for bullet in bullet_hit:
             if bullet == self:
                 continue
@@ -97,7 +98,6 @@ class Bullet(pygame.sprite.Sprite):
                 self.update_owner()
                 self.kill()
                 break
-
 
     def update_owner(self):
         if self.owner.bullet_sum > 0:
