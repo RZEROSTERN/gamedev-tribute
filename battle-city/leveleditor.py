@@ -1,5 +1,6 @@
 import pygame
 import gameconfig as gc
+from levels import LevelData
 
 
 class LevelEditor:
@@ -8,8 +9,12 @@ class LevelEditor:
         self.assets = assets
         self.active = True
 
-        self.level_data = None
+        self.level_data = LevelData()
         self.all_levels = []
+        
+        for stage in self.level_data.level_data:
+            self.all_levels.append(stage)
+
         self.overlay_screen = self.draw_screen()
         self.matrix = self.create_level_matrix()
 
@@ -25,6 +30,25 @@ class LevelEditor:
             999: self.assets.flag["Phoenix_Alive"]
         }
 
+        self.inserts = [
+            [-1, -1, -1, -1], # Empty
+            [-1, 432, -1, 432], # Brick starts
+            [-1, -1, 432, 432], 
+            [432, -1, 432, -1], 
+            [432, 432, -1, -1], 
+            [432, 432, 432, 432], # Brick ends
+            [-1, 482, -1, 482], # Steel starts
+            [-1, -1, 482, 482], 
+            [482, -1, 482, -1], 
+            [482, 482, -1, -1], 
+            [482, 482, 482, 482], # Steel ends
+            [483, 483, 483, 483], # Forest
+            [484, 484, 484, 484], # Ice
+            [533, 533, 533, 533], # Water
+        ]
+
+        self.index = 0
+        self.insert_tile = self.inserts[self.index]
         self.icon_image = self.assets.tank_images["Tank_4"]["Gold"]["Up"][0]
         self.icon_rect = self.icon_image.get_rect(topleft=(gc.SCREEN_BORDER_LEFT, gc.SCREEN_BORDER_TOP))
 
@@ -52,13 +76,41 @@ class LevelEditor:
                     self.icon_rect.y -= gc.IMAGE_SIZE
                     if self.icon_rect.y <= gc.SCREEN_BORDER_TOP:
                         self.icon_rect.y = gc.SCREEN_BORDER_TOP
+                
+                if event.key == pygame.K_SPACE:
+                    self.index += 1
+                    if self.index >= len(self.inserts):
+                        self.index = self.index % len(self.inserts)
+                    self.insert_tile = self.inserts[self.index]
+
+                if event.key == pygame.K_RETURN:
+                    self.validate_level()
+                    self.all_levels.append(self.matrix)
+                    self.level_data.save_level_data(self.all_levels)
+                    self.active = False
 
     def update(self):
-        pass
+        icon_grid_pos_col = (self.icon_rect.left - gc.SCREEN_BORDER_LEFT) // (gc.IMAGE_SIZE // 2)
+        icon_grid_pos_row = (self.icon_rect.top - gc.SCREEN_BORDER_TOP) // (gc.IMAGE_SIZE // 2)
+
+        self.matrix[icon_grid_pos_row][icon_grid_pos_col] = self.insert_tile[0]
+        self.matrix[icon_grid_pos_row][icon_grid_pos_col + 1] = self.insert_tile[1]
+        self.matrix[icon_grid_pos_row + 1][icon_grid_pos_col] = self.insert_tile[2]
+        self.matrix[icon_grid_pos_row + 1][icon_grid_pos_col + 1] = self.insert_tile[3]
 
     def draw(self, window):
         window.blit(self.overlay_screen, (0, 0))
         self.draw_grid_to_screen(window)
+
+        for i, row in enumerate(self.matrix):
+            for j, tile in enumerate(row):
+                if tile == -1:
+                    continue
+                else:
+                    window.blit(self.tile_type[tile], (
+                        gc.SCREEN_BORDER_LEFT + (j * gc.IMAGE_SIZE // 2), 
+                        gc.SCREEN_BORDER_TOP + (i * gc.IMAGE_SIZE // 2)))
+
         window.blit(self.icon_image, self.icon_rect)
         pygame.draw.rect(window, gc.GREEN, self.icon_rect, 1)
 
@@ -93,3 +145,18 @@ class LevelEditor:
             matrix.append(line)
 
         return matrix
+    
+    def validate_level(self):
+        for cell in gc.ENEMY_TANK_SPAWNS:
+            self.matrix[cell[1]][cell[0]] = -1
+        for cell in gc.PLAYER_TANK_SPAWNS:
+            self.matrix[cell[1]][cell[0]] = -1
+        for cell in gc.BASE:
+            self.matrix[cell[1]][cell[0]] = -1
+        
+        self.matrix[24][12] = 999
+
+        for cell in gc.FORT:
+            if self.matrix[cell[1]][cell[0]] == -1:
+                self.matrix[cell[1]][cell[0]] = 432
+

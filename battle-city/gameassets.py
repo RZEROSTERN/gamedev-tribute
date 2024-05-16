@@ -35,7 +35,7 @@ class GameAssets:
         self.ice_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[484], gc.BLACK)
         self.water_tiles = self._get_specified_images(self.spritesheet, gc.MAP_TILES[533], gc.BLACK)
 
-        # TODO: Number images
+        # Number images
         self.number_black_white = self._get_specified_images(self.number_image_black_white, gc.NUMS, gc.BLACK)
         self.number_black_orange = self._get_specified_images(self.number_image_black_orange, gc.NUMS, gc.BLACK)
 
