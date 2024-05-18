@@ -28,7 +28,7 @@ class Main:
         self.game = Game(self, self.assets, True, True)
 
         self.level_editor_on = False
-        self.level_creator = LevelEditor(self, self.assets, )
+        self.level_creator = None
 
     def run_game(self):
         # The Game Loop
@@ -63,8 +63,24 @@ class Main:
         if self.game_on:
             self.game.update()
 
+        if self.game:
+            if self.game.end_game == True:
+                self.start_screen = StartScreen(self, self.assets)
+                self.start_screen_active = True
+
+                self.game_on = False
+                self.game = None
+
         if self.level_editor_on:
             self.level_creator.update()
+
+        if self.level_creator:
+            if self.level_creator.active == False:
+                self.start_screen = StartScreen(self, self.assets)
+                self.start_screen_active = True
+
+                self.level_editor_on = False
+                self.level_creator = None
 
     def render(self):
         # Handle all of the assets
@@ -80,6 +96,18 @@ class Main:
             self.level_creator.draw(self.screen)
 
         pygame.display.update()
+
+    def start_new_game(self, player1, player2):
+        self.game_on = True
+        self.game = Game(self, self.assets, player1, player2)
+        self.start_screen_active = False
+        return
+
+    def start_level_creator(self):
+        self.level_editor_on = True
+        self.level_creator = LevelEditor(self, self.assets)
+        self.start_screen_active = False
+        return
 
 
 if __name__ == "__main__":

@@ -58,7 +58,7 @@ class LevelEditor:
                 self.main.run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.main.run = False
+                    self.active = False
                 if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                     self.icon_rect.x += gc.IMAGE_SIZE
                     if self.icon_rect.x >= gc.SCREEN_BORDER_RIGHT:

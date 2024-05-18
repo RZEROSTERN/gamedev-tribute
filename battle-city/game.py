@@ -27,6 +27,8 @@ class Game:
         if self.player2_active:
             self.player2 = PlayerTank(self, self.assets, self.groups, (400, 200), "Up", "Green", 1)
 
+        self.end_game = False
+
         self.enemies = gc.STD_ENEMIES
 
     def input(self):
@@ -44,7 +46,7 @@ class Game:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.main.run = False
+                    self.end_game = True
 
                 if event.key == pygame.K_SPACE:
                     if self.player1_active:

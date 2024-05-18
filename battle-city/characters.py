@@ -80,7 +80,6 @@ class Tank(pygame.sprite.Sprite):
 
         if self.active:
             window.blit(self.image, self.rect)
-            window.blit(self.mask_image, self.rect)
             pygame.draw.rect(window, gc.RED, self.rect, 1)
 
     def move_tank(self, direction):
