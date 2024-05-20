@@ -25,6 +25,9 @@ GREEN = (0, 255, 0)
 TANK_SPEED = IMAGE_SIZE // SPRITE_SIZE
 TANK_PARALYSIS = 2000
 
+P1_POS = (SCREEN_BORDER_LEFT + IMAGE_SIZE // 2 * 8, SCREEN_BORDER_TOP + IMAGE_SIZE // 2 * 24)
+P2_POS = (SCREEN_BORDER_LEFT + IMAGE_SIZE // 2 * 16, SCREEN_BORDER_TOP + IMAGE_SIZE // 2 * 24)
+
 SPAWN_STAR = {
     "star_0": [(SPRITE_SIZE * 16), (SPRITE_SIZE * 6), SPRITE_SIZE, SPRITE_SIZE], 
     "star_1": [(SPRITE_SIZE * 17), (SPRITE_SIZE * 6), SPRITE_SIZE, SPRITE_SIZE], 
@@ -140,3 +143,18 @@ PLAYER_TANK_SPAWNS = [(8, 24), (8, 25), (9, 24), (9, 25),
 BASE = [(12, 24), (12, 25), (13,24), (13,25)]
 
 FORT = [(11, 25), (11, 24), (11, 23), (12, 23), (13, 23), (14, 23), (14, 24), (14, 25)]
+
+TANK_SPAWN_QUEUE = {
+    "queue_0": [90, 10, 0, 0],
+    "queue_1": [80, 20, 0, 0],
+    "queue_2": [70, 30, 0, 0],
+    "queue_3": [60, 30, 10, 0],
+    "queue_4": [50, 30, 20, 0],
+    "queue_5": [40, 30, 30, 0],
+    "queue_6": [30, 30, 30, 10],
+    "queue_7": [20, 30, 30, 20],
+    "queue_8": [10, 30, 30, 30],
+    "queue_9": [10, 20, 40, 10],
+    "queue_10": [10, 10, 50, 30],
+    "queue_11": [0, 10, 50, 40],
+}
