@@ -11,6 +11,7 @@ class Game:
         self.assets = assets
 
         self.groups = {
+            "Player_Tanks": pygame.sprite.Group(),
             "All_Tanks": pygame.sprite.Group(),
             "Bullets": pygame.sprite.Group()
         }
@@ -30,6 +31,8 @@ class Game:
             self.player2 = PlayerTank(self, self.assets, self.groups, gc.P2_POS, "Up", "Green", 1)
 
         self.enemies = gc.STD_ENEMIES
+        self.enemy_tank_spawn_timer = gc.TANK_SPAWNING_TIME
+        self.enemy_spawn_positions = [gc.COM1_POSITION, gc.COM2_POSITION, gc.COM3_POSITION]
 
         self.create_new_stage()
 
@@ -77,6 +80,8 @@ class Game:
             for item in self.groups[dictKey]:
                 item.update()
 
+        self.spawn_enemy_tanks()
+
     def draw(self, window):
         self.hud.draw(window)
 
@@ -87,10 +92,17 @@ class Game:
         #    self.player2.draw(window)
 
         for dictKey in self.groups.keys():
+            if dictKey == "Player_Tanks":
+                continue
             for item in self.groups[dictKey]:
                 item.draw(window)
 
     def create_new_stage(self):
+        for key, value in self.groups.items():
+            if key == "Player_Tanks":
+                continue
+            value.empty()
+
         self.current_level_data = self.data.level_data[self.level_num - 1]
 
         self.enemies = random.choice([16, 17, 18, 19, 20])
@@ -103,9 +115,12 @@ class Game:
         self.generate_spawn_queue()
         self.spawn_pos_index = 0
         self.spawn_queue_index = 0
+        print(self.spawn_queue)
 
         if self.player1_active:
             self.player1.new_stage_spawn(gc.P1_POS)
+        if self.player2_active:
+            self.player2.new_stage_spawn(gc.P2_POS)
 
     def load_level_data(self, level):
         self.grid = []
@@ -133,8 +148,8 @@ class Game:
 
             self.grid.append(line)
 
-        for row in self.grid:
-            print(row)
+        #for row in self.grid:
+        #    print(row)
 
     def generate_spawn_queue(self):
         self.spawn_queue_ratios = gc.TANK_SPAWN_QUEUE[f"queue_{str((self.level_num % 36) // 3)}"]
@@ -145,3 +160,18 @@ class Game:
                 self.spawn_queue.append(f"level_{lvl}")
 
         random.shuffle(self.spawn_queue)
+
+    def spawn_enemy_tanks(self):
+        if self.enemies == 0:
+            return
+        
+        if pygame.time.get_ticks() - self.enemy_tank_spawn_timer >= gc.TANK_SPAWNING_TIME:
+            position = self.enemy_spawn_positions[self.spawn_pos_index % 3]
+            tank_level = gc.TANK_CRITERIA[self.spawn_queue[self.spawn_queue_index % len(self.spawn_queue)]]["image"]
+
+            Tank(self, self.assets, self.groups, position, "Down", True, "Silver", tank_level)
+
+            self.enemy_tank_spawn_timer = pygame.time.get_ticks()
+            self.spawn_pos_index += 1
+            self.spawn_queue_index += 1
+            self.enemies -= 1

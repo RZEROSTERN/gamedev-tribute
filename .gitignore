@@ -3,3 +3,7 @@
 *.obj
 *.pdb
 *.zip
+.DS_Store
+.DS_Store
+battle-city/.DS_Store
+space-invaders/.DS_Store

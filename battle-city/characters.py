@@ -12,6 +12,7 @@ class Tank(pygame.sprite.Sprite):
         self.groups = groups
 
         self.tank_group = self.groups["All_Tanks"]
+        self.player_group = self.groups["Player_Tanks"]
 
         self.tank_group.add(self)
 
@@ -198,6 +199,7 @@ class Tank(pygame.sprite.Sprite):
 class PlayerTank(Tank):
     def __init__(self, game, assets, groups, position, direction, colour, tank_level):
         super().__init__(game, assets, groups, position, direction, False, colour, tank_level)
+        self.player_group.add(self)
         self.lives = 3
 
     def input(self, keypressed):
@@ -222,5 +224,6 @@ class PlayerTank(Tank):
                 self.move_tank("Right")
 
     def new_stage_spawn(self, spawn_pos):
+        self.tank_group.add(self)
         self.xPos, self.yPos = spawn_pos
         self.rect.topleft = (self.xPos, self.yPos)
