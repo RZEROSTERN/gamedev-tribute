@@ -3,7 +3,7 @@ import pygame
 import gameconfig as gc
 from characters import PlayerTank, Tank
 from gamehud import GameHud
-
+from tile import BrickTile
 
 class Game:
     def __init__(self, main, assets, player1=True, player2=False):
@@ -13,7 +13,8 @@ class Game:
         self.groups = {
             "Player_Tanks": pygame.sprite.Group(),
             "All_Tanks": pygame.sprite.Group(),
-            "Bullets": pygame.sprite.Group()
+            "Bullets": pygame.sprite.Group(),
+            "Destructable_Tiles": pygame.sprite.Group()
         }
 
         self.player1_active = player1
@@ -115,7 +116,6 @@ class Game:
         self.generate_spawn_queue()
         self.spawn_pos_index = 0
         self.spawn_queue_index = 0
-        print(self.spawn_queue)
 
         if self.player1_active:
             self.player1.new_stage_spawn(gc.P1_POS)
@@ -135,6 +135,7 @@ class Game:
                     line.append(" ")
                 elif int(tile) == 432:
                     line.append(f"{tile}")
+                    map_tile = BrickTile(pos, self.groups["Destructable_Tiles"], self.assets.brick_tiles)
                 elif int(tile) == 482:
                     line.append(f"{tile}")
                 elif int(tile) == 483:
