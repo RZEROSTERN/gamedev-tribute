@@ -13,7 +13,7 @@ class TileType(pygame.sprite.Sprite):
         pass
 
     def get_rect_and_size(self, position):
-        self.rect = self.image.get_rect(topleft=(self.xPos, self.yPos))
+        self.rect = self.image.get_rect(topleft=position)
         self.width, self.height = self.image.get_size()
 
     def draw(self, window):
