@@ -30,6 +30,7 @@ class Bullet(pygame.sprite.Sprite):
         self.collide_edge_of_screen()
         self.collide_with_tank()
         self.collision_with_bullet()
+        self.collision_with_obstacle()
 
         self.mask = pygame.mask.from_surface(self.image)
         self.mask_image = self.mask.to_surface()
@@ -98,6 +99,14 @@ class Bullet(pygame.sprite.Sprite):
                 self.update_owner()
                 self.kill()
                 break
+
+    def collision_with_obstacle(self):
+        obstacle_collide = pygame.sprite.spritecollide(self, self.group["Destructable_Tiles"], False)
+        
+        for obstacle in obstacle_collide:
+            obstacle.hit_by_bullet(self)
+        
+        # self.kill()
 
     def update_owner(self):
         if self.owner.bullet_sum > 0:

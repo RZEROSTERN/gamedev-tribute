@@ -83,6 +83,16 @@ class Tank(pygame.sprite.Sprite):
             window.blit(self.image, self.rect)
             pygame.draw.rect(window, gc.RED, self.rect, 1)
 
+    def grid_alignment_movement(self, pos):
+        if pos % (gc.IMAGE_SIZE // 2) != 0:
+            if pos % (gc.IMAGE_SIZE // 2) < gc.IMAGE_SIZE // 4:
+                pos -= (pos % (gc.IMAGE_SIZE // 4))
+            elif pos % (gc.IMAGE_SIZE // 2) > gc.IMAGE_SIZE // 4:
+                pos += (gc.IMAGE_SIZE // 4) - (pos % (gc.IMAGE_SIZE // 4))
+            else:
+                return pos
+        return pos
+
     def move_tank(self, direction):
         if self.spawning:
             return
@@ -95,30 +105,31 @@ class Tank(pygame.sprite.Sprite):
 
         if direction == "Up":
             self.yPos -= self.tank_speed
-
+            self.xPos = self.grid_alignment_movement(self.xPos)
             if self.yPos < gc.SCREEN_BORDER_TOP:
                 self.yPos = gc.SCREEN_BORDER_TOP
 
         elif direction == "Down":
             self.yPos += self.tank_speed
-
+            self.xPos = self.grid_alignment_movement(self.xPos)
             if self.yPos + self.height > gc.SCREEN_BORDER_BOTTOM:
                 self.yPos = gc.SCREEN_BORDER_BOTTOM - self.height
 
         elif direction == "Left":
             self.xPos -= self.tank_speed
-
+            self.yPos = self.grid_alignment_movement(self.yPos)
             if self.xPos < gc.SCREEN_BORDER_LEFT:
                 self.xPos = gc.SCREEN_BORDER_LEFT
         elif direction == "Right":
             self.xPos += self.tank_speed
-
+            self.yPos = self.grid_alignment_movement(self.yPos)
             if self.xPos + self.width > gc.SCREEN_BORDER_RIGHT:
                 self.xPos = gc.SCREEN_BORDER_RIGHT - self.width
 
         self.rect.topleft = (self.xPos, self.yPos)
         self.tank_movement_animation()
         self.tank_on_tank_collisions()
+        self.tank_collision_with_obstacles()
 
     def tank_movement_animation(self):
         self.frame_index += 1
@@ -174,6 +185,27 @@ class Tank(pygame.sprite.Sprite):
                 if self.rect.bottom >= tank.rect.top and \
                         self.rect.left < tank.rect.right and self.rect.right > tank.rect.left:
                     self.rect.bottom = tank.rect.top
+                    self.yPos = self.rect.y
+
+    def tank_collision_with_obstacles(self):
+        wall_collision = pygame.sprite.spritecollide(self, self.groups["Impassable_Tiles"], False)
+        
+        for obstacle in wall_collision:
+            if self.direction == "Right":
+                if self.rect.right >= obstacle.rect.left:
+                    self.rect.right = obstacle.rect.left
+                    self.xPos = self.rect.x
+            elif self.direction == "Left":
+                if self.rect.left <= obstacle.rect.right:
+                    self.rect.left = obstacle.rect.right
+                    self.xPos = self.rect.x
+            elif self.direction == "Down":
+                if self.rect.bottom >= obstacle.rect.top:
+                    self.rect.bottom = obstacle.rect.top
+                    self.yPos = self.rect.y
+            elif self.direction == "Up":
+                if self.rect.top <= obstacle.rect.bottom:
+                    self.rect.top = obstacle.rect.bottom
                     self.yPos = self.rect.y
 
     def shoot(self):
