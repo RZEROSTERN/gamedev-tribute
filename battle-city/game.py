@@ -5,6 +5,7 @@ from characters import PlayerTank, Tank
 from gamehud import GameHud
 from tile import BrickTile, SteelTile, ForestTile, IceTile, WaterTile
 from fadeanimate import Fade
+from scorescreen import ScoreScreen
 
 class Game:
     def __init__(self, main, assets, player1=True, player2=False):
@@ -22,8 +23,11 @@ class Game:
             "Forest_Tiles": pygame.sprite.Group()
         }
 
+        self.top_score = 20000
         self.player1_active = player1
+        self.player1_score = 0
         self.player2_active = player2
+        self.player2_score = 0
 
         self.hud = GameHud(self, self.assets)
 
@@ -33,6 +37,7 @@ class Game:
         self.data = self.main.levels
 
         self.fade = Fade(self, self.assets, 10)
+        self.score_screen = ScoreScreen(self, self.assets)
 
         if self.player1_active:
             self.player1 = PlayerTank(self, self.assets, self.groups, gc.P1_POS, "Up", "Gold", 0)
@@ -109,12 +114,14 @@ class Game:
         
         if self.level_complete:
             if pygame.time.get_ticks() - self.level_transition_timer >= gc.TRANSITION_TIMER:
-                # self.stage_transition()
-                self.level_num += 1
-                self.create_new_stage()
+                self.stage_transition()
 
     def draw(self, window):
         self.hud.draw(window)
+
+        if self.score_screen.active:
+            self.score_screen.draw(window)
+            return
 
         # if self.player1_active:
         #    self.player1.draw(window)
@@ -226,3 +233,27 @@ class Game:
             self.spawn_pos_index += 1
             self.spawn_queue_index += 1
             self.enemies -= 1
+
+    def stage_transition(self):
+        if not self.score_screen.active:
+            self.score_screen.timer = pygame.time.get_ticks()
+
+            if self.player1_active:
+                self.score_screen.p1_score = self.player1_score
+                self.score_screen.p1_kill_list = sorted(self.player1.score_list)
+
+            if self.player2_active:
+                self.score_screen.p1_score = self.player2_score
+                self.score_screen.p2_kill_list = sorted(self.player2.score_list)
+
+            self.score_screen.update_basic_info(self.top_score, self.level_num) 
+
+        self.score_screen.active = True
+        self.score_screen.update()
+
+    def change_level(self, p1_score, p2_score):
+        self.level_num += 1
+        self.level_num = self.level_num % len(self.data.level_data)
+        self.player1_score = p1_score
+        self.player2_score = p2_score
+        self.create_new_stage()

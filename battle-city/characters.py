@@ -16,6 +16,11 @@ class Tank(pygame.sprite.Sprite):
 
         self.tank_group.add(self)
 
+        levels = {0: None, 4: "level_0", 5: "level_1", 6: "level_2", 7: "level_3"}
+
+        if enemy:
+            self.level = levels[tank_level]
+
         self.tank_images = self.assets.tank_images
         self.spawn_images = self.assets.spawn_star_images
 
@@ -234,6 +239,7 @@ class PlayerTank(Tank):
         super().__init__(game, assets, groups, position, direction, False, colour, tank_level)
         self.player_group.add(self)
         self.lives = 3
+        self.score_list = []
 
     def input(self, keypressed):
         if self.colour == "Gold":
@@ -264,3 +270,4 @@ class PlayerTank(Tank):
         self.xPos, self.yPos = spawn_pos
         self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
         self.rect.topleft = (self.xPos, self.yPos)
+        self.score_list.clear()

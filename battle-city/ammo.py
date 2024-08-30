@@ -80,6 +80,9 @@ class Bullet(pygame.sprite.Sprite):
                     (self.owner.enemy == True and tank.enemy == False):
                 if pygame.sprite.collide_mask(self, tank):
                     self.update_owner()
+                    if not self.owner.enemy:
+                        self.owner.score_list.append(gc.TANK_CRITERIA[tank.level]["score"])
+                        
                     tank.destroy_tank()
                     self.kill()
                     break
