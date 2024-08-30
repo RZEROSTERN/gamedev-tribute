@@ -225,6 +225,7 @@ class Tank(pygame.sprite.Sprite):
 
         if self.tank_health <= 0:
             self.kill()
+            self.game.enemies_killed -= 1
             return
 
 
@@ -257,5 +258,9 @@ class PlayerTank(Tank):
 
     def new_stage_spawn(self, spawn_pos):
         self.tank_group.add(self)
+        self.spawning = True
+        self.active = False
+        self.direction =  "Up"
         self.xPos, self.yPos = spawn_pos
+        self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
         self.rect.topleft = (self.xPos, self.yPos)

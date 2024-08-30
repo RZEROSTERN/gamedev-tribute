@@ -4,6 +4,7 @@ import gameconfig as gc
 from characters import PlayerTank, Tank
 from gamehud import GameHud
 from tile import BrickTile, SteelTile, ForestTile, IceTile, WaterTile
+from fadeanimate import Fade
 
 class Game:
     def __init__(self, main, assets, player1=True, player2=False):
@@ -26,8 +27,12 @@ class Game:
 
         self.hud = GameHud(self, self.assets)
 
-        self.level_num = 4
+        self.level_num = 1
+        self.level_complete = False
+        self.level_transition_timer = None
         self.data = self.main.levels
+
+        self.fade = Fade(self, self.assets, 10)
 
         if self.player1_active:
             self.player1 = PlayerTank(self, self.assets, self.groups, gc.P1_POS, "Up", "Gold", 0)
@@ -75,6 +80,15 @@ class Game:
     def update(self):
         self.hud.update()
 
+        if self.fade.fade_active:
+            self.fade.update()
+
+            if not self.fade.fade_active:
+                for tank in self.groups["All_Tanks"]:
+                    tank.spawn_timer = pygame.time.get_ticks()
+            
+            return
+
         # if self.player1_active:
         #    self.player1.update()
 
@@ -89,6 +103,16 @@ class Game:
 
         self.spawn_enemy_tanks()
 
+        if self.enemies_killed <= 0 and self.level_complete == False:
+            self.level_complete = True
+            self.level_transition_timer = pygame.time.get_ticks()
+        
+        if self.level_complete:
+            if pygame.time.get_ticks() - self.level_transition_timer >= gc.TRANSITION_TIMER:
+                # self.stage_transition()
+                self.level_num += 1
+                self.create_new_stage()
+
     def draw(self, window):
         self.hud.draw(window)
 
@@ -101,8 +125,15 @@ class Game:
         for dictKey in self.groups.keys():
             if dictKey == "Player_Tanks":
                 continue
+
+            if self.fade.fade_active == True and (dictKey == "All_Tanks" or dictKey == "Player_Tanks"):
+                continue
+
             for item in self.groups[dictKey]:
                 item.draw(window)
+
+        if self.fade.fade_active:
+            self.fade.draw(window)
 
     def create_new_stage(self):
         for key, value in self.groups.items():
@@ -113,15 +144,21 @@ class Game:
         self.current_level_data = self.data.level_data[self.level_num - 1]
 
         self.enemies = random.choice([16, 17, 18, 19, 20])
-        self.enemies = 5
+        self.enemies = 3
 
         self.enemies_killed = self.enemies
 
         self.load_level_data(self.current_level_data)
+        self.level_complete = False
+        
+        self.fade.level = self.level_num
+        self.fade.stage_image = self.fade.create_stage_image()
+        self.fade.fade_active = True
 
         self.generate_spawn_queue()
         self.spawn_pos_index = 0
         self.spawn_queue_index = 0
+        print(self.spawn_queue)
 
         if self.player1_active:
             self.player1.new_stage_spawn(gc.P1_POS)
