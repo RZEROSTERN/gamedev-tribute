@@ -1,7 +1,7 @@
 import random
 import pygame
 import gameconfig as gc
-from characters import PlayerTank, Tank
+from characters import PlayerTank, Tank, EnemyTank, SpecialTank
 from gamehud import GameHud
 from tile import BrickTile, SteelTile, ForestTile, IceTile, WaterTile
 from fadeanimate import Fade
@@ -20,7 +20,8 @@ class Game:
             "Bullets": pygame.sprite.Group(),
             "Destructable_Tiles": pygame.sprite.Group(),
             "Impassable_Tiles": pygame.sprite.Group(),
-            "Forest_Tiles": pygame.sprite.Group()
+            "Forest_Tiles": pygame.sprite.Group(),
+            "Power_Ups": pygame.sprite.Group(),
         }
 
         self.top_score = 20000
@@ -165,7 +166,6 @@ class Game:
         self.generate_spawn_queue()
         self.spawn_pos_index = 0
         self.spawn_queue_index = 0
-        print(self.spawn_queue)
 
         if self.player1_active:
             self.player1.new_stage_spawn(gc.P1_POS)
@@ -227,7 +227,12 @@ class Game:
             position = self.enemy_spawn_positions[self.spawn_pos_index % 3]
             tank_level = gc.TANK_CRITERIA[self.spawn_queue[self.spawn_queue_index % len(self.spawn_queue)]]["image"]
 
-            Tank(self, self.assets, self.groups, position, "Down", True, "Silver", tank_level)
+            special_tank = random.randint(1, len(self.spawn_queue))
+
+            #if special_tank == self.spawn_queue_index:
+            SpecialTank(self, self.assets, self.groups, position, "Down", "Silver", tank_level)
+            #else:
+            #    EnemyTank(self, self.assets, self.groups, position, "Down", "Silver", tank_level)
 
             self.enemy_tank_spawn_timer = pygame.time.get_ticks()
             self.spawn_pos_index += 1

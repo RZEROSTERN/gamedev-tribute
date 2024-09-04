@@ -1,6 +1,15 @@
+import random
 import pygame
 from ammo import Bullet
 import gameconfig as gc
+from powerups import PowerUps
+
+class MyRect(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height):
+        super().__init__()
+        self.image = None
+        self.rect = pygame.Rect(x, y, width, height)
+
 
 
 class Tank(pygame.sprite.Sprite):
@@ -38,7 +47,7 @@ class Tank(pygame.sprite.Sprite):
         self.bullet_speed = gc.TANK_SPEED * (3 * self.bullet_speed_modifier)
         self.score = 100 if not self.level else gc.TANK_CRITERIA[self.level]["score"]
         self.enemy = enemy
-        self.tank_health = 1
+        self.tank_health = 1 if not self.level else gc.TANK_CRITERIA[self.level]["health"]
 
         self.frame_index = 0
         self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
@@ -256,6 +265,13 @@ class Tank(pygame.sprite.Sprite):
             self.kill()
             self.game.enemies_killed -= 1
             return
+        
+        if self.tank_health == 3:
+            self.colour = "Green"
+        elif self.tank_health == 2:
+            self.colour = "Gold"
+        elif self.tank_health == 1:
+            self.colour = "Silver"
 
 
 class PlayerTank(Tank):
@@ -263,9 +279,26 @@ class PlayerTank(Tank):
         super().__init__(game, assets, groups, position, direction, False, colour, tank_level)
         self.player_group.add(self)
         self.lives = 3
+        
+        self.dead = False
+        self.game_over = False
+
         self.score_list = []
 
+        self.shield_start = True
+        self.shield = False
+        self.shield_time_limit = 5000
+        self.shield_timer = pygame.time.get_ticks()
+        self.shield_images = self.assets.shield_images
+        self.shield_img_index = 0
+        self.shield_animation_timer = pygame.time.get_ticks()
+        self.shield_image = self.shield_images[f"shield_{self.shield_img_index + 1}"]
+        self.shield_image_rect = self.shield_image.get_rect(topleft = (self.rect.topleft))
+
     def input(self, keypressed):
+        if self.game_over or self.dead:
+            return
+        
         if self.colour == "Gold":
             if keypressed[pygame.K_w]:
                 self.move_tank("Up")
@@ -286,12 +319,188 @@ class PlayerTank(Tank):
             elif keypressed[pygame.K_RIGHT]:
                 self.move_tank("Right")
 
+    def update(self):
+        if self.game_over:
+            return
+        
+        if not self.spawning:
+            if self.shield_start:
+                self.shield_timer = pygame.time.get_ticks()
+                self.shield_start = False
+                self.shield = True
+
+            if self.shield:
+                if pygame.time.get_ticks() - self.shield_animation_timer >= 50:
+                    self.shield_img_index += 1
+                    self.shield_animation_timer = pygame.time.get_ticks()
+
+                self.shield_img_index = self.shield_img_index % 2
+                self.shield_image = self.shield_images[f"shield_{self.shield_img_index + 1}"]
+
+                self.shield_image_rect.topleft = self.rect.topleft
+
+                if pygame.time.get_ticks() - self.shield_time_limit >= self.shield_timer:
+                    self.shield = False
+        
+        super().update()
+
+    def draw(self, window):
+        if self.game_over:
+            return
+        
+        super().draw(window)
+
+        if self.shield and not self.spawning:
+            window.blit(self.shield_image, self.shield_image_rect)
+
+    def shoot(self):
+        if self.game_over:
+            return
+        
+        super().shoot()
+
+    def destroy_tank(self):
+        if self.shield:
+            return
+        
+        if self.dead or self.game_over:
+            return
+        
+        self.dead = True
+        self.lives -= 1
+
+        if self.lives <= 0:
+            self.game_over = True
+
+        self.respawn_tank()
+
     def new_stage_spawn(self, spawn_pos):
         self.tank_group.add(self)
         self.spawning = True
         self.active = False
+        self.shield_start = True
         self.direction =  "Up"
         self.xPos, self.yPos = spawn_pos
         self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
         self.rect.topleft = (self.xPos, self.yPos)
         self.score_list.clear()
+
+    def respawn_tank(self):
+        self.spawning = True
+        self.active = False
+        self.spawn_timer = pygame.time.get_ticks()
+        self.shield_start = True
+        self.direction = "Up"
+        self.xPos, self.yPos = self.spawn_pos
+        self.image = self.tank_images[f"Tank_{self.tank_level}"][self.colour][self.direction][self.frame_index]
+        self.rect = self.image.get_rect(topleft=(self.spawn_pos))
+        self.mask = self.mask_dict[self.direction]
+        self.dead = False
+
+class EnemyTank(Tank):
+    def __init__(self, game, assets, groups, position, direction, colour, tank_level):
+        super().__init__(game, assets, groups, position, direction, True, colour, tank_level)
+
+        self.time_between_shots = random.choice([300, 600, 900])
+        self.shot_timer = pygame.time.get_ticks()
+
+        self.direction_rect = {
+            "Left": MyRect(self.xPos - (self.width // 2), self.yPos, self.width // 2, self.height),
+            "Right": MyRect(self.xPos + self.width, self.yPos, self.width // 2, self.height),
+            "Up": MyRect(self.xPos, self.yPos - (self.height // 2), self.width, self.height // 2),
+            "Down": MyRect(self.xPos, self.yPos + self.height, self.width, self.height // 2)
+        }
+
+        self.move_directions = []
+        self.change_direction_timer = pygame.time.get_ticks()
+        self.game_screen_rect = MyRect(gc.GAME_SCREEN[0], gc.GAME_SCREEN[1], gc.GAME_SCREEN[2], gc.GAME_SCREEN[3])
+
+    def ai_shooting(self):
+        if self.paralyzed:
+            return
+        if self.bullet_sum < self.bullet_limit:
+            if pygame.time.get_ticks() - self.shot_timer >= self.time_between_shots:
+                self.shoot()
+                self.shot_timer = pygame.time.get_ticks()
+
+    def ai_move(self, direction):
+        super().move_tank(direction)
+
+        self.direction_rect["Left"].rect.update(self.xPos - (self.width // 2), self.yPos, self.width // 2, self.height)
+        self.direction_rect["Right"].rect.update(self.xPos + self.width, self.yPos, self.width // 2, self.height)
+        self.direction_rect["Up"].rect.update(self.xPos, self.yPos - (self.height // 2), self.width, self.height // 2)
+        self.direction_rect["Down"].rect.update(self.xPos, self.yPos + self.height, self.width, self.height // 2)
+
+    def ai_move_direction(self):
+        directional_list_copy = self.move_directions.copy()
+
+        if pygame.time.get_ticks() - self.change_direction_timer <= 750:
+            return
+        
+        for key, value in self.direction_rect.items():
+            if pygame.Rect.contains(self.game_screen_rect.rect, value):
+                obstacle = pygame.sprite.spritecollideany(value, self.groups["Impassable_Tiles"])
+
+                if not obstacle:
+                    if key not in directional_list_copy:
+                        directional_list_copy.append(key)
+                elif obstacle:
+                    if value.rect.contains(obstacle.rect) and key in directional_list_copy:
+                        directional_list_copy.remove(key)
+                    else:
+                        if key in directional_list_copy and key != self.direction:
+                            directional_list_copy.remove(key)
+
+                tank = pygame.sprite.spritecollideany(value, self.groups["All_Tanks"])
+
+                if tank:
+                    if key in directional_list_copy:
+                        directional_list_copy.remove(key)
+            else:
+                if key in directional_list_copy:
+                    directional_list_copy.remove(key)
+
+        if self.move_directions != directional_list_copy or (self.direction not in directional_list_copy):
+            self.move_directions = directional_list_copy.copy()
+
+            if len(self.move_directions) > 0:
+                self.direction = random.choice(self.move_directions)
+            self.change_direction_timer = pygame.time.get_ticks()
+
+    def update(self):
+        super().update()
+
+        if self.spawning:
+            return
+        
+        self.ai_move(self.direction)
+        self.ai_move_direction()
+        self.ai_shooting()
+
+    def draw(self, window):
+        super().draw(window)
+
+        for value in self.direction_rect.values():
+            pygame.draw.rect(window, gc.GREEN, value.rect, 2)
+
+class SpecialTank(EnemyTank):
+    def __init__(self, game, assets, groups, position, direction, colour, tank_level):
+        super().__init__(game, assets, groups, position, direction, colour, tank_level)
+
+        self.colour_swap_timer = pygame.time.get_ticks()
+        self.special = True
+
+    def update(self):
+        super().update()
+
+        if self.special:
+            if pygame.time.get_ticks() - self.colour_swap_timer >= 100:
+                self.colour = "Special" if self.colour == "Silver" else "Silver"
+                self.colour_swap_timer = pygame.time.get_ticks()
+
+    def destroy_tank(self):
+        if self.special:
+            self.special = False
+            PowerUps(self.game, self.assets, self.groups)
+
+        super().destroy_tank()

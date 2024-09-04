@@ -44,7 +44,7 @@ SPAWN_STAR = {
 
 SHIELD = {
     "shield_1": [(SPRITE_SIZE * 16), (SPRITE_SIZE * 9), 16, 16],
-    "shield_2": [(SPRITE_SIZE * 16), (SPRITE_SIZE * 9), 16, 16]
+    "shield_2": [(SPRITE_SIZE * 17), (SPRITE_SIZE * 9), 16, 16]
 }
 
 POWER_UPS = {
