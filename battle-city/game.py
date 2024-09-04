@@ -51,6 +51,8 @@ class Game:
         self.enemy_spawn_positions = [gc.COM1_POSITION, gc.COM2_POSITION, gc.COM3_POSITION]
 
         self.create_new_stage()
+        self.fortify = False
+        self.fortify_timer = pygame.time.get_ticks()
 
         self.end_game = False
 
@@ -94,6 +96,11 @@ class Game:
                     tank.spawn_timer = pygame.time.get_ticks()
             
             return
+        
+        if self.fortify:
+            if pygame.time.get_ticks() - self.fortify_timer > 10000:
+                self.power_up_fortify(start = False, end = True)
+                self.fortify = False
 
         # if self.player1_active:
         #    self.player1.update()
@@ -152,7 +159,7 @@ class Game:
         self.current_level_data = self.data.level_data[self.level_num - 1]
 
         self.enemies = random.choice([16, 17, 18, 19, 20])
-        self.enemies = 3
+        # self.enemies = 10
 
         self.enemies_killed = self.enemies
 
@@ -229,10 +236,10 @@ class Game:
 
             special_tank = random.randint(1, len(self.spawn_queue))
 
-            #if special_tank == self.spawn_queue_index:
-            SpecialTank(self, self.assets, self.groups, position, "Down", "Silver", tank_level)
-            #else:
-            #    EnemyTank(self, self.assets, self.groups, position, "Down", "Silver", tank_level)
+            if special_tank == self.spawn_queue_index:
+                SpecialTank(self, self.assets, self.groups, position, "Down", "Silver", tank_level)
+            else:
+                EnemyTank(self, self.assets, self.groups, position, "Down", "Silver", tank_level)
 
             self.enemy_tank_spawn_timer = pygame.time.get_ticks()
             self.spawn_pos_index += 1
@@ -262,3 +269,38 @@ class Game:
         self.player1_score = p1_score
         self.player2_score = p2_score
         self.create_new_stage()
+
+    def power_up_fortify(self, start = True, end = False):
+        off_x, off_y = gc.SCREEN_BORDER_LEFT, gc.SCREEN_BORDER_TOP
+
+        positions = [
+            (off_x + gc.IMAGE_SIZE // 2 * 11, off_y + gc.IMAGE_SIZE // 2 * 25),
+            (off_x + gc.IMAGE_SIZE // 2 * 11, off_y + gc.IMAGE_SIZE // 2 * 24),
+            (off_x + gc.IMAGE_SIZE // 2 * 11, off_y + gc.IMAGE_SIZE // 2 * 23),
+            (off_x + gc.IMAGE_SIZE // 2 * 12, off_y + gc.IMAGE_SIZE // 2 * 23),
+            (off_x + gc.IMAGE_SIZE // 2 * 13, off_y + gc.IMAGE_SIZE // 2 * 23),
+            (off_x + gc.IMAGE_SIZE // 2 * 14, off_y + gc.IMAGE_SIZE // 2 * 23),
+            (off_x + gc.IMAGE_SIZE // 2 * 14, off_y + gc.IMAGE_SIZE // 2 * 24),
+            (off_x + gc.IMAGE_SIZE // 2 * 14, off_y + gc.IMAGE_SIZE // 2 * 25),
+        ]
+
+        if start:
+            for pos in positions:
+                pos_rect = pygame.rect.Rect(pos[0], pos[1], gc.IMAGE_SIZE // 2, gc.IMAGE_SIZE // 2)
+
+                for rectangle in self.groups["Impassable_Tiles"]:
+                    if rectangle.rect.colliderect(pos_rect):
+                        rectangle.kill()
+
+                map_tile = SteelTile(pos, self.groups["Destructable_Tiles"], self.assets.steel_tiles)
+                self.groups["Impassable_Tiles"].add(map_tile)
+        elif end:
+            for pos in positions:
+                pos_rect = pygame.rect.Rect(pos[0], pos[1], gc.IMAGE_SIZE // 2, gc.IMAGE_SIZE // 2)
+
+                for rectangle in self.groups["Impassable_Tiles"]:
+                    if rectangle.rect.colliderect(pos_rect):
+                        rectangle.kill()
+
+                map_tile = BrickTile(pos, self.groups["Destructable_Tiles"], self.assets.brick_tiles)
+                self.groups["Impassable_Tiles"].add(map_tile)
