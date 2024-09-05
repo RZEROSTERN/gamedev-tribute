@@ -40,7 +40,6 @@ class Bullet(pygame.sprite.Sprite):
 
     def draw(self, window):
         window.blit(self.image, self.rect)
-        pygame.draw.rect(window, gc.GREEN, self.rect, 1)
 
     def move(self):
         if self.direction == "Up":
