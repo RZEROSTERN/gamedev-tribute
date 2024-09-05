@@ -151,6 +151,8 @@ BASE = [(12, 24), (12, 25), (13,24), (13,25)]
 
 FORT = [(11, 25), (11, 24), (11, 23), (12, 23), (13, 23), (14, 23), (14, 24), (14, 25)]
 
+FLAG_POSITION = (SCREEN_BORDER_LEFT + IMAGE_SIZE // 2 * 12, SCREEN_BORDER_TOP + IMAGE_SIZE // 2 * 24)
+
 TANK_CRITERIA = {
     "level_0": {"image": 4, "health": 1, "speed": 0.5, "cooldown": 1, "power": 1, "score": 100},
     "level_1": {"image": 5, "health": 1, "speed": 1, "cooldown": 1, "power": 1, "score": 200},

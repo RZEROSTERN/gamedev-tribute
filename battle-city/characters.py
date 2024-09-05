@@ -3,6 +3,7 @@ import pygame
 from ammo import Bullet
 import gameconfig as gc
 from powerups import PowerUps
+from explosions import Explosion
 
 class MyRect(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
@@ -106,7 +107,6 @@ class Tank(pygame.sprite.Sprite):
 
         if self.active:
             window.blit(self.image, self.rect)
-            pygame.draw.rect(window, gc.RED, self.rect, 1)
 
     def grid_alignment_movement(self, pos):
         if pos % (gc.IMAGE_SIZE // 2) != 0:
@@ -155,6 +155,7 @@ class Tank(pygame.sprite.Sprite):
         self.tank_movement_animation()
         self.tank_on_tank_collisions()
         self.tank_collision_with_obstacles()
+        self.base_collision()
 
     def tank_movement_animation(self):
         self.frame_index += 1
@@ -249,12 +250,19 @@ class Tank(pygame.sprite.Sprite):
                 self.spawning = False
                 self.active = True
 
+    def base_collision(self):
+        if not self.groups["Eagle"].sprite.active:
+            return
+
+        if self.rect.colliderect(self.groups["Eagle"].sprite.rect):
+            self.groups["Eagle"].sprite.destroy_base()
 
     def shoot(self):
         if self.bullet_sum >= self.bullet_limit:
             return
 
         bullet = Bullet(self.groups, self, self.rect.center, self.direction, self.assets)
+        self.assets.channel_fire_sound.play(self.assets.fire_sound)
         self.bullet_sum += 1
 
     def paralyze_tank(self, paralysis_time):
@@ -267,6 +275,8 @@ class Tank(pygame.sprite.Sprite):
 
         if self.tank_health <= 0:
             self.kill()
+            Explosion(self.assets, self.groups, self.rect.center, 5, self.score)
+            self.assets.channel_explosion_sound.play(self.assets.explosion_sound)
             self.game.enemies_killed -= 1
             return
         
@@ -298,6 +308,9 @@ class PlayerTank(Tank):
         self.shield_animation_timer = pygame.time.get_ticks()
         self.shield_image = self.shield_images[f"shield_{self.shield_img_index + 1}"]
         self.shield_image_rect = self.shield_image.get_rect(topleft = (self.rect.topleft))
+
+        self.movement_sound = self.assets.movement_sound
+        self.player_movement_channel = pygame.mixer.Channel(0)
 
     def input(self, keypressed):
         if self.game_over or self.dead:
@@ -357,6 +370,14 @@ class PlayerTank(Tank):
         if self.shield and not self.spawning:
             window.blit(self.shield_image, self.shield_image_rect)
 
+    def move_tank(self, direction):
+        if self.spawning:
+            return
+        
+        self.player_movement_channel.play(self.movement_sound)
+
+        super().move_tank(direction)
+
     def shoot(self):
         if self.game_over:
             return
@@ -380,6 +401,9 @@ class PlayerTank(Tank):
             self.mask_dict = self.get_various_masks()
             self.mask = self.mask_dict[self.direction]
             return
+        
+        Explosion(self.assets, self.groups, self.rect.center, 5, 0)
+        self.assets.channel_explosion_sound.play(self.assets.explosion_sound)
         
         self.dead = True
         self.lives -= 1
@@ -501,9 +525,6 @@ class EnemyTank(Tank):
 
     def draw(self, window):
         super().draw(window)
-
-        for value in self.direction_rect.values():
-            pygame.draw.rect(window, gc.GREEN, value.rect, 2)
 
 class SpecialTank(EnemyTank):
     def __init__(self, game, assets, groups, position, direction, colour, tank_level):

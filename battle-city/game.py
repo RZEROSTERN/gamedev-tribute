@@ -6,6 +6,8 @@ from gamehud import GameHud
 from tile import BrickTile, SteelTile, ForestTile, IceTile, WaterTile
 from fadeanimate import Fade
 from scorescreen import ScoreScreen
+from eagle import Eagle
+from gameover import GameOver
 
 class Game:
     def __init__(self, main, assets, player1=True, player2=False):
@@ -20,8 +22,11 @@ class Game:
             "Bullets": pygame.sprite.Group(),
             "Destructable_Tiles": pygame.sprite.Group(),
             "Impassable_Tiles": pygame.sprite.Group(),
+            "Explosion": pygame.sprite.Group(),
             "Forest_Tiles": pygame.sprite.Group(),
             "Power_Ups": pygame.sprite.Group(),
+            "Scores": pygame.sprite.Group(),
+            "Eagle": pygame.sprite.GroupSingle()
         }
 
         self.top_score = 20000
@@ -39,22 +44,26 @@ class Game:
 
         self.fade = Fade(self, self.assets, 10)
         self.score_screen = ScoreScreen(self, self.assets)
+        self.game_over_screen = GameOver(self, self.assets)
 
         if self.player1_active:
             self.player1 = PlayerTank(self, self.assets, self.groups, gc.P1_POS, "Up", "Gold", 0)
 
         if self.player2_active:
-            self.player2 = PlayerTank(self, self.assets, self.groups, gc.P2_POS, "Up", "Green", 1)
+            self.player2 = PlayerTank(self, self.assets, self.groups, gc.P2_POS, "Up", "Green", 0)
 
         self.enemies = gc.STD_ENEMIES
         self.enemy_tank_spawn_timer = gc.TANK_SPAWNING_TIME
         self.enemy_spawn_positions = [gc.COM1_POSITION, gc.COM2_POSITION, gc.COM3_POSITION]
 
         self.create_new_stage()
+
         self.fortify = False
         self.fortify_timer = pygame.time.get_ticks()
 
         self.end_game = False
+        self.game_on = False
+        self.game_over = False
 
     def input(self):
         keypressed = pygame.key.get_pressed()
@@ -81,12 +90,11 @@ class Game:
                     if self.player2_active:
                         self.player2.shoot()
 
-                if event.key == pygame.K_RETURN:
-                    Tank(self, self.assets, self.groups, (400, 400), "Down")
-                    self.enemies -= 1
-
     def update(self):
         self.hud.update()
+
+        if self.game_over_screen.active:
+            self.game_over_screen.update()
 
         if self.fade.fade_active:
             self.fade.update()
@@ -97,16 +105,29 @@ class Game:
             
             return
         
+        if not self.game_over:
+            if self.player1_active and self.player2_active:
+                if self.player1.game_over and self.player2.game_over and not self.game_over_screen.active:
+                    self.groups["All_Tanks"].empty()
+                    self.game_over = True
+                    self.assets.channel_gameover_sound.play(self.assets.gameover_sound)
+                    self.game_over_screen.activate()
+                    return
+            elif self.player1_active and not self.player2_active and not self.game_over_screen.active:
+                if self.player1.game_over:
+                    self.groups["All_Tanks"].empty()
+                    self.game_over = True
+                    self.assets.channel_gameover_sound.play(self.assets.gameover_sound)
+                    self.game_over_screen.activate()
+                    return
+        elif self.game_over and not self.end_game and not self.game_over_screen.active:
+            self.stage_transition(True)
+            return
+        
         if self.fortify:
             if pygame.time.get_ticks() - self.fortify_timer > 10000:
                 self.power_up_fortify(start = False, end = True)
                 self.fortify = False
-
-        # if self.player1_active:
-        #    self.player1.update()
-
-        # if self.player2_active:
-        #    self.player2.update()
 
         for dictKey in self.groups.keys():
             if dictKey == "Impassable_Tiles":
@@ -115,6 +136,11 @@ class Game:
                 item.update()
 
         self.spawn_enemy_tanks()
+
+        for tank in self.groups["All_Tanks"]:
+            if tank.enemy == True and tank.spawning == False:
+                self.assets.channel_enemy_movement_sound.play(self.assets.enemy_movement_sound)
+                break
 
         if self.enemies_killed <= 0 and self.level_complete == False:
             self.level_complete = True
@@ -131,12 +157,6 @@ class Game:
             self.score_screen.draw(window)
             return
 
-        # if self.player1_active:
-        #    self.player1.draw(window)
-
-        # if self.player2_active:
-        #    self.player2.draw(window)
-
         for dictKey in self.groups.keys():
             if dictKey == "Player_Tanks":
                 continue
@@ -150,6 +170,9 @@ class Game:
         if self.fade.fade_active:
             self.fade.draw(window)
 
+        if self.game_over_screen.active:
+            self.game_over_screen.draw(window)
+
     def create_new_stage(self):
         for key, value in self.groups.items():
             if key == "Player_Tanks":
@@ -159,12 +182,15 @@ class Game:
         self.current_level_data = self.data.level_data[self.level_num - 1]
 
         self.enemies = random.choice([16, 17, 18, 19, 20])
-        # self.enemies = 10
 
         self.enemies_killed = self.enemies
 
         self.load_level_data(self.current_level_data)
+        self.eagle = Eagle(self, self.assets, self.groups)
         self.level_complete = False
+
+        if self.main.game_on:
+            self.assets.game_start_sound.play()
         
         self.fade.level = self.level_num
         self.fade.stage_image = self.fade.create_stage_image()
@@ -213,9 +239,6 @@ class Game:
 
             self.grid.append(line)
 
-        #for row in self.grid:
-        #    print(row)
-
     def generate_spawn_queue(self):
         self.spawn_queue_ratios = gc.TANK_SPAWN_QUEUE[f"queue_{str((self.level_num % 36) // 3)}"]
         self.spawn_queue = []
@@ -246,7 +269,7 @@ class Game:
             self.spawn_queue_index += 1
             self.enemies -= 1
 
-    def stage_transition(self):
+    def stage_transition(self, game_over = False):
         if not self.score_screen.active:
             self.score_screen.timer = pygame.time.get_ticks()
 
@@ -261,7 +284,7 @@ class Game:
             self.score_screen.update_basic_info(self.top_score, self.level_num) 
 
         self.score_screen.active = True
-        self.score_screen.update()
+        self.score_screen.update(game_over)
 
     def change_level(self, p1_score, p2_score):
         self.level_num += 1

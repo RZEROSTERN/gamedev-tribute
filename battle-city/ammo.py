@@ -1,6 +1,6 @@
 import pygame
 import gameconfig as gc
-
+from explosions import Explosion
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups, owner, pos, dir, assets):
@@ -33,6 +33,7 @@ class Bullet(pygame.sprite.Sprite):
         self.collide_with_tank()
         self.collision_with_bullet()
         self.collision_with_obstacle()
+        self.base_collision()
 
         self.mask = pygame.mask.from_surface(self.image)
         self.mask_image = self.mask.to_surface()
@@ -58,6 +59,9 @@ class Bullet(pygame.sprite.Sprite):
                 self.rect.bottom >= gc.SCREEN_BORDER_BOTTOM or \
                 self.rect.left <= gc.SCREEN_BORDER_LEFT or \
                 self.rect.right >= gc.SCREEN_BORDER_RIGHT:
+            
+            Explosion(self.assets, self.group, self.rect.center, 1)
+            self.assets.channel_steel_sound.play(self.assets.steel_sound)
             self.update_owner()
             self.kill()
 
@@ -72,7 +76,7 @@ class Bullet(pygame.sprite.Sprite):
                 if pygame.sprite.collide_mask(self, tank):
                     self.update_owner()
                     tank.paralyze_tank(gc.TANK_PARALYSIS)
-
+                    Explosion(self.assets, self.group, self.rect.center, 1)
                     self.kill()
                     break
 
@@ -84,6 +88,7 @@ class Bullet(pygame.sprite.Sprite):
                         self.owner.score_list.append(gc.TANK_CRITERIA[tank.level]["score"])
                         
                     tank.destroy_tank()
+                    Explosion(self.assets, self.group, self.rect.center, 1)
                     self.kill()
                     break
 
@@ -107,9 +112,22 @@ class Bullet(pygame.sprite.Sprite):
         obstacle_collide = pygame.sprite.spritecollide(self, self.group["Destructable_Tiles"], False)
         
         for obstacle in obstacle_collide:
+            if obstacle.name == "Brick":
+                self.assets.channel_brick_sound.play(self.assets.brick_sound)
+            elif obstacle.name == "Steel":
+                self.assets.channel_steel_sound.play(self.assets.steel_sound)
+
             obstacle.hit_by_bullet(self)
+            Explosion(self.assets, self.group, self.rect.center, 1)
         
         # self.kill()
+
+    def base_collision(self):
+        if self.rect.colliderect(self.group["Eagle"].sprite.rect):
+            Explosion(self.assets, self.group, self.rect.center, 1)
+            self.update_owner()
+            self.group["Eagle"].sprite.destroy_base()
+            self.kill()
 
     def update_owner(self):
         if self.owner.bullet_sum > 0:

@@ -11,6 +11,7 @@ class Main:
     def __init__(self):
         # Main Game Obj
         pygame.init()
+        pygame.mixer.init()
 
         self.screen = pygame.display.set_mode((gc.SCREEN_WIDTH, gc.SCREEN_HEIGHT))
         pygame.display.set_caption("Battle City")

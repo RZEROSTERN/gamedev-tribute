@@ -90,6 +90,11 @@ class LevelEditor:
                     self.main.levels.level_data = self.all_levels
                     self.active = False
 
+                if event.key == pygame.K_LCTRL:
+                    self.all_levels.insert(0, self.matrix)
+                    self.main.levels.level_data = self.all_levels
+                    self.active = False
+
     def update(self):
         icon_grid_pos_col = (self.icon_rect.left - gc.SCREEN_BORDER_LEFT) // (gc.IMAGE_SIZE // 2)
         icon_grid_pos_row = (self.icon_rect.top - gc.SCREEN_BORDER_TOP) // (gc.IMAGE_SIZE // 2)
@@ -101,7 +106,6 @@ class LevelEditor:
 
     def draw(self, window):
         window.blit(self.overlay_screen, (0, 0))
-        self.draw_grid_to_screen(window)
 
         for i, row in enumerate(self.matrix):
             for j, tile in enumerate(row):
@@ -121,6 +125,7 @@ class LevelEditor:
         pygame.draw.rect(overlay_screen, gc.BLACK, (gc.GAME_SCREEN))
         return overlay_screen
 
+    # DEBUG METHOD
     def draw_grid_to_screen(self, window):
         vert_lines = (gc.SCREEN_BORDER_RIGHT - gc.SCREEN_BORDER_LEFT) // gc.IMAGE_SIZE
         hor_lines = (gc.SCREEN_BORDER_BOTTOM - gc.SCREEN_BORDER_TOP) // gc.IMAGE_SIZE
