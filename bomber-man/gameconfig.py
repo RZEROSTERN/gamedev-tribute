@@ -1,0 +1,9 @@
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 892
+
+FPS = 60
+
+GAME_TITLE = "Bomberman"
+
+# Colors
+BLACK = (0, 0, 0)
