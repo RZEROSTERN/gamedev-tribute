@@ -7,3 +7,21 @@ GAME_TITLE = "Bomberman"
 
 # Colors
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+
+SPRITESHEET_PATH = "assets"
+SPRITESHEET_NAME = "spritesheet.png"
+SPRITESHEET_WIDTH = 192 * 4
+SPRITESHEET_HEIGHT = 272 * 4
+
+TILE_SIZE = 64
+
+# Sprite sheet coordinates
+
+PLAYER = { 
+    "walk_left": [(0,1), (0,0), (0,2)],
+    "walk_down": [(0,4), (0,3), (0,5)],
+    "walk_right": [(0,7), (0,6), (0,8)],
+    "walk_up": [(0,10), (0,9), (0,11)],
+    "dead_animation": [(1,0), (1,1), (1,2), (1,3), (1,4), (1,5), (1,6)],
+    }
