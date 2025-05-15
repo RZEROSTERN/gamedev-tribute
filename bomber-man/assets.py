@@ -6,6 +6,9 @@ class Assets:
         self.spritesheet = self.load_spritesheet(gc.SPRITESHEET_PATH, gc.SPRITESHEET_NAME, gc.SPRITESHEET_WIDTH, gc.SPRITESHEET_HEIGHT)
 
         self.player_character = self.load_sprite_range(gc.PLAYER, self.spritesheet)
+        self.hard_block = self.load_sprite_range(gc.HARD_BLOCK, self.spritesheet)
+        self.soft_block = self.load_sprite_range(gc.SOFT_BLOCK, self.spritesheet)
+        self.background = self.load_sprite_range(gc.BACKGROUND, self.spritesheet)
 
     def load_spritesheet(self, path, filename, width, height):
         image = pygame.image.load(f"{path}/{filename}").convert_alpha()

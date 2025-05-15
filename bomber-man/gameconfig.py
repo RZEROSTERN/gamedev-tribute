@@ -15,6 +15,8 @@ SPRITESHEET_WIDTH = 192 * 4
 SPRITESHEET_HEIGHT = 272 * 4
 
 TILE_SIZE = 64
+ROWS = 12
+COLUMNS = 30
 
 # Sprite sheet coordinates
 
@@ -24,4 +26,9 @@ PLAYER = {
     "walk_right": [(0,7), (0,6), (0,8)],
     "walk_up": [(0,10), (0,9), (0,11)],
     "dead_animation": [(1,0), (1,1), (1,2), (1,3), (1,4), (1,5), (1,6)],
-    }
+}
+
+HARD_BLOCK = { "hard_block": [(1, 10)] }
+SOFT_BLOCK = { "soft_block": [(2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6)] }
+BACKGROUND = { "background": [(2, 11)] }
+
