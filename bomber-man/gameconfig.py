@@ -3,11 +3,16 @@ SCREEN_HEIGHT = 892
 
 FPS = 60
 
+Y_OFFSET = 92
+
 GAME_TITLE = "Bomberman"
 
 # Colors
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+GREY = (188, 188, 188)
 
 SPRITESHEET_PATH = "assets"
 SPRITESHEET_NAME = "spritesheet.png"

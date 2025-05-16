@@ -2,12 +2,16 @@ import pygame
 import gameconfig as gc
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, game, image_dictionary):
-        super().__init__()
+    def __init__(self, game, image_dictionary, group, row_number, column_number, size):
+        super().__init__(group)
         self.game = game
 
-        self.x = 0
-        self.y = 0
+        self.row_number = row_number
+        self.column_number = column_number
+        self.size = size
+
+        self.x = self.column_number * self.size
+        self.y = (self.row_number * self.size) + gc.Y_OFFSET
 
         self.alive = True
         self.speed = 3
@@ -76,5 +80,64 @@ class Character(pygame.sprite.Sprite):
             self.y += direction[action]
 
         self.animate(action)
+        
+        self.snap_to_grid()
+        self.play_area_restriction(64, (gc.COLUMNS - 1) * 64, gc.Y_OFFSET + 64, ((gc.ROWS - 1) * 64) + gc.Y_OFFSET)
 
         self.rect.topleft = (self.x, self.y)
+
+        self.collision_detection_items(self.game.groups["hard_blocks"])
+        self.collision_detection_items(self.game.groups["soft_blocks"])
+
+        
+
+    def collision_detection_items(self, item_list):
+        for item in item_list:
+            if self.rect.colliderect(item.rect) and item.passable == False:
+                if self.action == "walk_left":
+                    if self.rect.left < item.rect.right:
+                        self.rect.left = item.rect.right
+                        self.x, self.y = self.rect.topleft
+                        return
+                if self.action == "walk_right":
+                    if self.rect.right > item.rect.left:
+                        self.rect.right = item.rect.left
+                        self.x, self.y = self.rect.topleft
+                        return
+                
+                if self.action == "walk_up":
+                    if self.rect.top < item.rect.bottom:
+                        self.rect.top = item.rect.bottom
+                        self.x, self.y = self.rect.topleft
+                        return
+                if self.action == "walk_down":
+                    if self.rect.bottom > item.rect.top:
+                        self.rect.bottom = item.rect.top
+                        self.x, self.y = self.rect.topleft
+                        return
+                    
+    def snap_to_grid(self):
+        x_pos = self.x % gc.TILE_SIZE
+        y_pos = (self.y - gc.Y_OFFSET) % gc.TILE_SIZE
+
+        if self.action in ["walk_up", "walk_down"]:
+            if x_pos <= 12:
+                self.x = self.x - x_pos
+            if x_pos >= 52:
+                self.x = self.x + (gc.TILE_SIZE - x_pos)
+        elif self.action in ["walk_left", "walk_right"]:
+            if y_pos <= 12:
+                self.y = self.y - y_pos
+            if y_pos >= 52:
+                self.y = self.y + (gc.TILE_SIZE - y_pos)
+
+    def play_area_restriction(self, left_x, right_x, top_y, bottom_y):
+        if self.x < left_x:
+            self.x = left_x
+        elif self.x > right_x:
+            self.x = right_x
+
+        if self.y < top_y:
+            self.y = top_y
+        elif self.y > bottom_y:
+            self.y = bottom_y
