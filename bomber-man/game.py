@@ -9,6 +9,8 @@ class Game:
         self.main = main
         self.assets = assets
 
+        self.camera_x_offset = 0
+
         self.groups = {
             "hard_blocks": pygame.sprite.Group(),
             "soft_blocks": pygame.sprite.Group(),
@@ -33,11 +35,11 @@ class Game:
 
         for row_number, row in enumerate(self.level_matrix):
             for column_number, col in enumerate(row):
-                window.blit(self.assets.background["background"][0], ((column_number * gc.TILE_SIZE), (row_number * gc.TILE_SIZE) + gc.Y_OFFSET))
+                window.blit(self.assets.background["background"][0], ((column_number * gc.TILE_SIZE) - self.camera_x_offset, (row_number * gc.TILE_SIZE) + gc.Y_OFFSET))
 
         for value in self.groups.values():
             for item in value:
-                item.draw(window)
+                item.draw(window, self.camera_x_offset)
 
     def generate_level_matrix(self, rows, columns):
         level_matrix = []
@@ -85,3 +87,7 @@ class Game:
                         matrix[row_number][column_number] = cell
 
         return
+    
+    def update_x_camera_offset_player_position(self, player_x_position):
+        if player_x_position >= 576 and player_x_position <= 1280:
+            self.camera_x_offset = player_x_position - 576

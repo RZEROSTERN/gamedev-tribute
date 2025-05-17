@@ -49,9 +49,9 @@ class Character(pygame.sprite.Sprite):
     def update(self):
         pass
 
-    def draw(self, window):
-        window.blit(self.image, self.rect)
-        pygame.draw.rect(window, gc.RED, self.rect, 1)
+    def draw(self, window, offset):
+        window.blit(self.image, (self.rect.x - offset, self.rect.y))
+        pygame.draw.rect(window, gc.RED, (self.rect.x - offset, self.rect.y, 64, 64), 1)
 
     def animate(self, action):
         if pygame.time.get_ticks() - self.animation_time_set >= self.animation_time:
@@ -89,7 +89,7 @@ class Character(pygame.sprite.Sprite):
         self.collision_detection_items(self.game.groups["hard_blocks"])
         self.collision_detection_items(self.game.groups["soft_blocks"])
 
-        
+        self.game.update_x_camera_offset_player_position(self.rect.x)
 
     def collision_detection_items(self, item_list):
         for item in item_list:
