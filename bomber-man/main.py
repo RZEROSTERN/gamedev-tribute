@@ -21,6 +21,7 @@ class Main:
         self.game.input()
 
     def update(self):
+        self.game.update()
         self.fps.tick(gc.FPS)
 
     def draw(self, window):

@@ -1,5 +1,6 @@
 import pygame
 import gameconfig as gc
+from bomb import Bomb
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, game, image_dictionary, group, row_number, column_number, size):
@@ -32,6 +33,11 @@ class Character(pygame.sprite.Sprite):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.game.main.run = False
+                elif event.key == pygame.K_SPACE:
+                    row, column = ((self.rect.centery - gc.Y_OFFSET) // gc.TILE_SIZE, self.rect.centerx // self.size)
+
+                    if self.game.level_matrix[row][column] == "_":
+                        Bomb(self.game, self.game.assets.bomb["bomb"], self.game.groups["bomb"], row, column, gc.TILE_SIZE)
 
         keys_pressed = pygame.key.get_pressed()
 
