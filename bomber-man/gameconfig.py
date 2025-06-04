@@ -36,4 +36,4 @@ PLAYER = {
 HARD_BLOCK = { "hard_block": [(1, 10)] }
 SOFT_BLOCK = { "soft_block": [(2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6)] }
 BACKGROUND = { "background": [(2, 11)] }
-
+BOMB = { "bomb": [(1,7), (1,8), (1,9), (1,8)] }
