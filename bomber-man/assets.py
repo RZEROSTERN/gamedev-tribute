@@ -10,6 +10,14 @@ class Assets:
         self.soft_block = self.load_sprite_range(gc.SOFT_BLOCK, self.spritesheet)
         self.background = self.load_sprite_range(gc.BACKGROUND, self.spritesheet)
         self.bomb = self.load_sprite_range(gc.BOMB, self.spritesheet)
+        self.explosions = self.load_sprite_range(gc.EXPLOSIONS, self.spritesheet)
+
+        for image_list in ["right_end", "right_mid", "down_end", "down_mid"]:
+            self.rotate_images_in_list(self.explosions[image_list], 180)
+            
+        for ind, image in enumerate(self.explosions["right_end"]):
+            image = pygame.transform.rotate(image, 180)
+            self.explosions["right_end"][ind] = image
 
     def load_spritesheet(self, path, filename, width, height):
         image = pygame.image.load(f"{path}/{filename}").convert_alpha()
@@ -43,4 +51,9 @@ class Assets:
                 animation_images[animation].append(image)
 
         return animation_images
+    
+    def rotate_images_in_list(self, image_list, rotation):
+        for ind, image in enumerate(image_list):
+            image = pygame.transform.rotate(image, rotation)
+            image_list[ind] = image
     

@@ -16,8 +16,13 @@ class Character(pygame.sprite.Sprite):
 
         self.alive = True
         self.speed = 3
+        self.bombs_limit = 1
+        self.remote = False  # Remote control for the last planted bomb
+        self.power = 1
         
         self.action = "walk_left"
+
+        self.bombs_planted = 0
 
         self.index = 0
         self.animation_time = 50
@@ -36,8 +41,11 @@ class Character(pygame.sprite.Sprite):
                 elif event.key == pygame.K_SPACE:
                     row, column = ((self.rect.centery - gc.Y_OFFSET) // gc.TILE_SIZE, self.rect.centerx // self.size)
 
-                    if self.game.level_matrix[row][column] == "_":
-                        Bomb(self.game, self.game.assets.bomb["bomb"], self.game.groups["bomb"], row, column, gc.TILE_SIZE)
+                    if self.game.level_matrix[row][column] == "_" and self.bombs_planted < self.bombs_limit:
+                        Bomb(self.game, self.game.assets.bomb["bomb"], self.game.groups["bomb"], self.power, row, column, gc.TILE_SIZE, self.remote)
+                elif event.key == pygame.K_j and self.remote and self.game.groups["bomb"]:
+                    bomb_list = self.game.groups["bomb"].sprites()
+                    bomb_list[-1].explode()
 
         keys_pressed = pygame.key.get_pressed()
 
@@ -94,6 +102,7 @@ class Character(pygame.sprite.Sprite):
 
         self.collision_detection_items(self.game.groups["hard_blocks"])
         self.collision_detection_items(self.game.groups["soft_blocks"])
+        self.collision_detection_items(self.game.groups["bomb"])
 
         self.game.update_x_camera_offset_player_position(self.rect.x)
 
