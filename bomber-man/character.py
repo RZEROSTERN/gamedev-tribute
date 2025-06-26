@@ -16,7 +16,7 @@ class Character(pygame.sprite.Sprite):
 
         self.alive = True
         self.speed = 3
-        self.bombs_limit = 1
+        self.bombs_limit = 2
         self.remote = False  # Remote control for the last planted bomb
         self.power = 1
         

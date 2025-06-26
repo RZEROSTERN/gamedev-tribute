@@ -14,10 +14,6 @@ class Assets:
 
         for image_list in ["right_end", "right_mid", "down_end", "down_mid"]:
             self.rotate_images_in_list(self.explosions[image_list], 180)
-            
-        for ind, image in enumerate(self.explosions["right_end"]):
-            image = pygame.transform.rotate(image, 180)
-            self.explosions["right_end"][ind] = image
 
     def load_spritesheet(self, path, filename, width, height):
         image = pygame.image.load(f"{path}/{filename}").convert_alpha()

@@ -38,7 +38,28 @@ class HardBlock(Blocks):
 class SoftBlock(Blocks):
     def __init__(self, game, images, group, row_number, column_number, size):
         super().__init__(game, images, group, row_number, column_number, size)
-        self.passable = True
+
+        self.animation_timer = pygame.time.get_ticks()
+        self.animation_frame_rate = 50
+        self.destroyed = False
+
+    def update(self):
+        if self.destroyed:
+            if pygame.time.get_ticks() - self.animation_timer >= self.animation_frame_rate:
+                self.image_index += 1
+                if self.image_index == len(self.image_list):
+                    self.kill()
+                    return
+                
+                self.image = self.image_list[self.image_index]
+                self.animation_timer = pygame.time.get_ticks()
+
+    def destroy_soft_block(self):
+        if not self.destroyed:
+            self.animation_timer = pygame.time.get_ticks()
+            self.destroyed = True
+            self.game.level_matrix[self.row][self.column] = "_"
+            return
 
     def __repr__(self):
         return "'@'"
