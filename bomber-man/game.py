@@ -1,8 +1,9 @@
 import pygame
 import gameconfig as gc
+from enemy import Enemy
 from character import Character
 from blocks import HardBlock, SoftBlock
-from random import choice
+from random import choice, randint
 
 class Game:
     def __init__(self, main, assets):
@@ -16,7 +17,8 @@ class Game:
             "soft_blocks": pygame.sprite.Group(),
             "bomb": pygame.sprite.Group(),
             "player": pygame.sprite.Group(),
-            "explosions": pygame.sprite.Group()
+            "explosions": pygame.sprite.Group(),
+            "enemies": pygame.sprite.Group(),
         }
 
         self.player = Character(self, self.assets.player_character, self.groups["player"], 3, 2, gc.TILE_SIZE)
@@ -31,6 +33,15 @@ class Game:
         for value in self.groups.values():
             for item in value:
                 item.update()
+
+        if self.groups["explosions"]:
+            killed_enemies = pygame.sprite.groupcollide(self.groups["explosions"], self.groups["enemies"], False, False)
+
+            if killed_enemies:
+                for flame, enemies in killed_enemies.items():
+                    for enemy in enemies:
+                        if pygame.sprite.collide_mask(flame, enemy):
+                            enemy.destroy()
 
     def draw(self, window):
         window.fill(gc.GREY)
@@ -56,6 +67,7 @@ class Game:
 
         self.insert_hard_blocks_into_matrix(level_matrix)
         self.insert_soft_blocks_into_matrix(level_matrix)
+        self.insert_enemies_into_level(level_matrix)
 
         for row in level_matrix:
             print(row)
@@ -93,3 +105,25 @@ class Game:
     def update_x_camera_offset_player_position(self, player_x_position):
         if player_x_position >= 576 and player_x_position <= 1280:
             self.camera_x_offset = player_x_position - 576
+
+    def insert_enemies_into_level(self, matrix):
+        enemies_list = ["ballom" for i in range(10)]
+
+        player_column = self.player.column_number
+        player_row = self.player.row_number
+
+        for enemy in enemies_list:
+            valid_choice = False
+
+            while not valid_choice:
+                row = randint(0, gc.ROWS)
+                column = randint(0, gc.COLUMNS)
+
+                if row in [player_row - 3, player_row - 2, player_row - 1, player_row, player_row + 1, player_row + 2, player_row + 3] and \
+                   column in [player_column - 3, player_column - 2, player_column - 1, player_column, player_column + 1, player_column + 2, player_column + 3]:
+                    continue
+                elif matrix[row][column] != "_":
+                    valid_choice = True
+                    Enemy(self, self.assets.ballom, self.groups["enemies"], row, column, gc.TILE_SIZE)
+                else:
+                    continue

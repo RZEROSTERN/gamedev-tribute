@@ -12,6 +12,8 @@ class Assets:
         self.bomb = self.load_sprite_range(gc.BOMB, self.spritesheet)
         self.explosions = self.load_sprite_range(gc.EXPLOSIONS, self.spritesheet)
 
+        self.ballom = self.load_sprite_range(gc.BALLOM, self.spritesheet)
+
         for image_list in ["right_end", "right_mid", "down_end", "down_mid"]:
             self.rotate_images_in_list(self.explosions[image_list], 180)
 
