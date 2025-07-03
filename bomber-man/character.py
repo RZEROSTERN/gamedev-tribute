@@ -11,25 +11,9 @@ class Character(pygame.sprite.Sprite):
         self.column_number = column_number
         self.size = size
 
-        self.x = self.column_number * self.size
-        self.y = (self.row_number * self.size) + gc.Y_OFFSET
+        self.set_player(image_dictionary)
 
-        self.alive = True
-        self.speed = 3
-        self.bombs_limit = 2
-        self.remote = False  # Remote control for the last planted bomb
-        self.power = 1
-        
-        self.action = "walk_left"
-
-        self.bombs_planted = 0
-
-        self.index = 0
-        self.animation_time = 50
-        self.animation_time_set = pygame.time.get_ticks()
-        self.image_dictionary = image_dictionary
-        self.image = self.image_dictionary[self.action][self.index] #Definitive image. Still not implemented.
-        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+        self.lives = 3
 
     def input(self):
         for event in pygame.event.get():
@@ -61,7 +45,14 @@ class Character(pygame.sprite.Sprite):
         self.rect.topleft = (self.x, self.y)
 
     def update(self):
-        pass
+        if len(self.game.groups["explosions"]) > 0:
+            self.deadly_collisions(self.game.groups["explosions"])
+
+        self.deadly_collisions(self.game.groups["enemies"])
+
+        if self.action == "dead_animation":
+            self.animate("dead_animation")
+            return
 
     def draw(self, window, offset):
         window.blit(self.image, (self.rect.x - offset, self.rect.y))
@@ -73,6 +64,10 @@ class Character(pygame.sprite.Sprite):
 
             if self.index == len(self.image_dictionary[action]):
                 self.index = 0
+
+                if self.action == "dead_animation":
+                    self.reset_player()
+                    return
                 # self.index = self.index % len(self.image_dictionary[action])
 
             self.image = self.image_dictionary[action][self.index]
@@ -156,3 +151,53 @@ class Character(pygame.sprite.Sprite):
             self.y = top_y
         elif self.y > bottom_y:
             self.y = bottom_y
+
+    def set_player_position(self):
+        self.x = self.column_number * self.size
+        self.y = (self.row_number * self.size) + gc.Y_OFFSET
+
+    def set_player_images(self):
+        self.image = self.image_dictionary[self.action][self.index] #Definitive image. Still not implemented.
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+
+    def set_player(self, image_dictionary):
+        self.set_player_position()
+
+        self.alive = True
+        self.speed = 3
+        self.bombs_limit = 2
+        self.remote = False  # Remote control for the last planted bomb
+        self.power = 1
+        
+        self.action = "walk_right"
+
+        self.bombs_planted = 0
+
+        self.index = 0
+        self.animation_time = 50
+        self.animation_time_set = pygame.time.get_ticks()
+        self.image_dictionary = image_dictionary
+
+        self.set_player_images()
+
+    def reset_player(self):
+        self.lives -= 1
+
+        if self.lives < 0:
+            self.game.main.run = False
+            return
+        
+        self.game.regenerate_stage()
+        self.set_player(self.image_dictionary)
+
+    def deadly_collisions(self, group):
+        if not self.alive:
+            return
+        
+        for item in group:
+            if not self.rect.colliderect(item.rect):
+                continue
+            if pygame.sprite.collide_mask(self, item):
+                self.action = "dead_animation"
+                self.alive = False
+                return

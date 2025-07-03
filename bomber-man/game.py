@@ -106,7 +106,7 @@ class Game:
             self.camera_x_offset = player_x_position - 576
 
     def insert_enemies_into_level(self, matrix):
-        enemies_list = ["pontan" for i in range(10)]
+        enemies_list = self.select_enemies_to_spawn()
 
         player_column = self.player.column_number
         player_row = self.player.row_number
@@ -126,3 +126,53 @@ class Game:
                     Enemy(self, self.assets.enemies[enemy], self.groups["enemies"], enemy, row, column, gc.TILE_SIZE)
                 else:
                     continue
+
+    def regenerate_stage(self):
+        for key in self.groups.keys():
+            if key == "player":
+                continue
+            self.groups[key].empty()
+
+        self.level_matrix.clear()
+        self.level_matrix = self.generate_level_matrix(gc.ROWS, gc.COLUMNS)
+
+        self.camera_x_offset = 0
+
+    def select_enemies_to_spawn(self):
+        enemies_list = []
+        enemies = {
+            0: "ballom",
+            1: "ballom",
+            2: "onil",
+            3: "dahl",
+            4: "minvo",
+            5: "doria",
+            6: "ovape",
+            7: "pass",
+            8: "pontan",
+        }
+
+        if self.level <= 8:
+            self.add_enemies_to_list(8, 2, 0, enemies, enemies_list)
+        elif self.level <= 17:
+            self.add_enemies_to_list(7, 2, 1, enemies, enemies_list)
+        elif self.level <= 26:
+            self.add_enemies_to_list(6, 3, 1, enemies, enemies_list)
+        elif self.level <= 35:
+            self.add_enemies_to_list(5, 3, 2, enemies, enemies_list)
+        elif self.level <= 45:
+            self.add_enemies_to_list(4, 4, 2, enemies, enemies_list)
+        else:
+            self.add_enemies_to_list(3, 4, 4, enemies, enemies_list)
+        
+        return enemies_list
+    
+    def add_enemies_to_list(self, num1, num2, num3, enemies, enemies_list):
+        for num in range(num1):
+            enemies_list.append("ballom")
+        for num in range(num2):
+            enemies_list.append(enemies[self.level % 9])
+        for num in range(num3):
+            enemies_list.append(choice(list(enemies.values())))
+
+        return 
