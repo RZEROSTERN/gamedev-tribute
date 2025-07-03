@@ -59,7 +59,6 @@ class Game:
 
         for row in range(rows + 1):
             line = []
-
             for column in range(columns + 1):
                 line.append("_")
 
@@ -107,7 +106,7 @@ class Game:
             self.camera_x_offset = player_x_position - 576
 
     def insert_enemies_into_level(self, matrix):
-        enemies_list = ["ballom" for i in range(10)]
+        enemies_list = ["pontan" for i in range(10)]
 
         player_column = self.player.column_number
         player_row = self.player.row_number
@@ -122,8 +121,8 @@ class Game:
                 if row in [player_row - 3, player_row - 2, player_row - 1, player_row, player_row + 1, player_row + 2, player_row + 3] and \
                    column in [player_column - 3, player_column - 2, player_column - 1, player_column, player_column + 1, player_column + 2, player_column + 3]:
                     continue
-                elif matrix[row][column] != "_":
+                elif matrix[row][column] == "_":
                     valid_choice = True
-                    Enemy(self, self.assets.ballom, self.groups["enemies"], row, column, gc.TILE_SIZE)
+                    Enemy(self, self.assets.enemies[enemy], self.groups["enemies"], enemy, row, column, gc.TILE_SIZE)
                 else:
                     continue

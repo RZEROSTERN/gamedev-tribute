@@ -12,10 +12,19 @@ class Assets:
         self.bomb = self.load_sprite_range(gc.BOMB, self.spritesheet)
         self.explosions = self.load_sprite_range(gc.EXPLOSIONS, self.spritesheet)
 
-        self.ballom = self.load_sprite_range(gc.BALLOM, self.spritesheet)
-
         for image_list in ["right_end", "right_mid", "down_end", "down_mid"]:
             self.rotate_images_in_list(self.explosions[image_list], 180)
+
+        self.enemies = {
+            "ballom": self.load_sprite_range(gc.BALLOM, self.spritesheet),
+            "onil": self.load_sprite_range(gc.ONIL, self.spritesheet),
+            "dahl": self.load_sprite_range(gc.DAHL, self.spritesheet),
+            "minvo": self.load_sprite_range(gc.MINVO, self.spritesheet),
+            "doria": self.load_sprite_range(gc.DORIA, self.spritesheet),
+            "ovape": self.load_sprite_range(gc.OVAPE, self.spritesheet),
+            "pass": self.load_sprite_range(gc.PASS, self.spritesheet),
+            "pontan": self.load_sprite_range(gc.PONTAN, self.spritesheet),
+        }
 
     def load_spritesheet(self, path, filename, width, height):
         image = pygame.image.load(f"{path}/{filename}").convert_alpha()
