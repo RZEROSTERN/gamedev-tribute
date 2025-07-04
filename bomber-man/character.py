@@ -45,14 +45,20 @@ class Character(pygame.sprite.Sprite):
         self.rect.topleft = (self.x, self.y)
 
     def update(self):
-        if len(self.game.groups["explosions"]) > 0:
-            self.deadly_collisions(self.game.groups["explosions"])
+        if not self.invincible:
+            if len(self.game.groups["explosions"]) > 0 and not self.flame_pass:
+                self.deadly_collisions(self.game.groups["explosions"])
 
-        self.deadly_collisions(self.game.groups["enemies"])
+            self.deadly_collisions(self.game.groups["enemies"])
 
         if self.action == "dead_animation":
             self.animate("dead_animation")
+
+        if not self.invincible:
             return
+        
+        if pygame.time.get_ticks() - self.invincible_timer >= gc.INVINCIBLE_TIME:
+            self.invincible = False
 
     def draw(self, window, offset):
         window.blit(self.image, (self.rect.x - offset, self.rect.y))
@@ -96,7 +102,10 @@ class Character(pygame.sprite.Sprite):
         self.rect.topleft = (self.x, self.y)
 
         self.collision_detection_items(self.game.groups["hard_blocks"])
-        self.collision_detection_items(self.game.groups["soft_blocks"])
+
+        if self.wall_pass:
+            self.collision_detection_items(self.game.groups["soft_blocks"])
+        
         self.collision_detection_items(self.game.groups["bomb"])
 
         self.game.update_x_camera_offset_player_position(self.rect.x)
@@ -165,9 +174,14 @@ class Character(pygame.sprite.Sprite):
 
         self.alive = True
         self.speed = 3
-        self.bombs_limit = 2
+        self.bombs_limit = 1
         self.remote = False  # Remote control for the last planted bomb
         self.power = 1
+        self.bomb_pass = False
+        self.flame_pass = False
+        self.wall_pass = False
+        self.invincible = False
+        self.invincible_timer = None
         
         self.action = "walk_right"
 

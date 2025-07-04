@@ -68,6 +68,9 @@ class Explosion(pygame.sprite.Sprite):
                 elif self.game.level_matrix[direction[0]][direction[1]] in self.game.groups["soft_blocks"].sprites():
                     self.game.level_matrix[direction[0]][direction[1]].destroy_soft_block()
                     valid_directions[index] = False
+                elif self.game.level_matrix[direction[0]][direction[1]] in self.game.groups["specials"].sprites():
+                    self.game.level_matrix[direction[0]][direction[1]].hit_by_explosion()
+                    valid_directions[index] = False
                 else:
                     valid_directions[index] = False
                     continue

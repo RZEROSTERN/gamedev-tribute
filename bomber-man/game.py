@@ -4,6 +4,7 @@ from enemy import Enemy
 from character import Character
 from blocks import HardBlock, SoftBlock
 from random import choice, randint
+from blocks import SpecialSoftBlock
 
 class Game:
     def __init__(self, main, assets):
@@ -19,11 +20,13 @@ class Game:
             "player": pygame.sprite.Group(),
             "explosions": pygame.sprite.Group(),
             "enemies": pygame.sprite.Group(),
+            "specials": pygame.sprite.Group(),
         }
 
         self.player = Character(self, self.assets.player_character, self.groups["player"], 3, 2, gc.TILE_SIZE)
 
         self.level = 1
+        self.level_special = self.select_a_special()
         self.level_matrix = self.generate_level_matrix(gc.ROWS, gc.COLUMNS)
 
     def input(self):
@@ -66,6 +69,8 @@ class Game:
 
         self.insert_hard_blocks_into_matrix(level_matrix)
         self.insert_soft_blocks_into_matrix(level_matrix)
+        self.insert_power_up_into_matrix(level_matrix, self.level_special)
+        self.insert_power_up_into_matrix(level_matrix, "exit")
         self.insert_enemies_into_level(level_matrix)
 
         for row in level_matrix:
@@ -101,12 +106,34 @@ class Game:
 
         return
     
+    def insert_power_up_into_matrix(self, matrix, special):
+        power_up = special
+        valid = False
+
+        while not valid:
+            row = randint(0, gc.ROWS)
+            column = randint(0, gc.COLUMNS)
+
+            if row == 0 or row == len(matrix) - 1 or column == 0 or column == len(matrix[0]) - 1:
+                continue
+            elif row % 2 == 0 and column % 2 == 0:
+                continue
+            elif row in [2, 3, 4] and column in [1, 2, 3]:
+                continue
+            elif matrix[row][column] != "_":
+                continue
+            else:
+                valid = True
+                
+            cell = SpecialSoftBlock(self, self.assets.soft_block["soft_block"], self.groups["soft_blocks"], row, column, gc.TILE_SIZE, power_up)
+            matrix[row][column] = cell
+    
     def update_x_camera_offset_player_position(self, player_x_position):
         if player_x_position >= 576 and player_x_position <= 1280:
             self.camera_x_offset = player_x_position - 576
 
-    def insert_enemies_into_level(self, matrix):
-        enemies_list = self.select_enemies_to_spawn()
+    def insert_enemies_into_level(self, matrix, enemies = None):
+        enemies_list = self.select_enemies_to_spawn() if enemies is None else enemies
 
         player_column = self.player.column_number
         player_row = self.player.row_number
@@ -175,4 +202,41 @@ class Game:
         for num in range(num3):
             enemies_list.append(choice(list(enemies.values())))
 
-        return 
+        return
+    
+    def select_a_special(self):
+        specials = list(gc.SPECIALS.keys())
+        specials.remove("exit")
+
+        if self.level == 4:
+            power_up = "speed_up"
+        elif self.level == 1:
+            power_up = "bomb_up"
+        elif self.player.bombs_limit <= 2 or self.player.power <= 2:
+            power_up = choice(["bomb_up", "power_up"])
+        else:
+            if self.player.wall_pass:
+                specials.remove("wall_hack")
+            if self.player.remote:
+                specials.remove("remote")
+            if self.player.bomb_pass:
+                specials.remove("bomb_pass")
+            if self.player.flame_pass:
+                specials.remove("flame_pass")
+            if self.player.bombs_limit == 10:
+                specials.remove("bomb_up")
+            if self.player.power == 10:
+                specials.remove("fire_up")
+            
+            power_up = choice(specials)
+
+        return power_up
+    
+    def new_stage(self):
+        self.level += 1
+        self.level_special = self.select_a_special()
+        self.player.set_player_position()
+        self.player.set_player_images()
+        self.regenerate_stage()
+
+        print(self.level)

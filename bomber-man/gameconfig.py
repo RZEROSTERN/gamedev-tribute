@@ -33,6 +33,7 @@ SPRITESHEET_HEIGHT = 272 * 4
 TILE_SIZE = 64
 ROWS = 12
 COLUMNS = 30
+INVINCIBLE_TIME = 25000  # Time in milliseconds for invincibility after being hit by an explosion
 
 # Sprite sheet coordinates
 
@@ -123,4 +124,28 @@ PONTAN = {
     "walk_left": [(5, 11), (6, 11), (7, 11), (8, 11)],
     "walk_up": [(5, 11), (6, 11), (7, 11), (8, 11)],
     "death": [(9, 11), (5, 7), (5, 8), (5, 9), (5, 10)],
+}
+
+SPECIALS = {
+    "bomb_up": [(3, 8)],
+    "fire_up": [(3, 9)],
+    "speed_up": [(3, 10)],
+    "wall_hack": [(3, 11)],
+    "remote": [(4, 8)],
+    "bomb_pass": [(4, 9)],
+    "flame_pass": [(4, 10)],
+    "invincible": [(4, 11)],
+    "exit": [(1, 11)],
+}
+
+SPECIAL_CONNECTIONS = {
+    "bomb_up": "ballom",
+    "fire_up": "onil",
+    "speed_up": "dahl",
+    "wall_hack": "minvo",
+    "remote": "doria",
+    "bomb_pass": "ovape",
+    "flame_pass": "pass",
+    "invincible": "pontan",
+    "exit": "pontan",
 }

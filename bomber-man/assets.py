@@ -26,6 +26,8 @@ class Assets:
             "pontan": self.load_sprite_range(gc.PONTAN, self.spritesheet),
         }
 
+        self.specials = self.load_sprite_range(gc.SPECIALS, self.spritesheet)
+
     def load_spritesheet(self, path, filename, width, height):
         image = pygame.image.load(f"{path}/{filename}").convert_alpha()
         image = pygame.transform.scale(image, (width, height))
